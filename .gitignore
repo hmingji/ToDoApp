@@ -25,3 +25,5 @@ yarn-error.log*
 bin
 certs
 obj
+
+.vs
