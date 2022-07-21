@@ -1,0 +1,38 @@
+version: '3.4'
+
+services:
+  todotask.api:
+    image: ${DOCKER_REGISTRY-}todotaskapi
+    build:
+      context: .
+      dockerfile: Services/ToDoTask/Dockerfile
+
+  todotaskdb:
+    image: postgres
+
+  identityserverdb:
+    image: postgres
+
+  pgadmin:
+    image: dpage/pgadmin4
+
+  portainer:
+    image: portainer/portainer-ce
+
+  identityserver:
+    image: ${DOCKER_REGISTRY-}identityserver
+    build:
+      context: .
+      dockerfile: Services/Identity/Dockerfile
+  
+  todotask.client:
+    image: ${DOCKER_REGISTRY-}todotaskclient
+    build:
+      context: .
+      dockerfile: client/Dockerfile.development
+
+volumes:
+  todo_data:
+  identity_data:
+  pgadmin_data:
+  portainer_data:

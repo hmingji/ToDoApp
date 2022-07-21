@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\client",
+    "\\client\\src",
+    "\\client\\src\\app",
+    "\\client\\src\\app\\layout",
+    "\\client\\src\\app\\models",
+    "\\Services",
+    "\\Services\\ToDoTask",
+    "\\Services\\ToDoTask\\ToDoTask.API",
+    "\\Services\\ToDoTask\\ToDoTask.API\\Extensions"
+  ],
+  "SelectedNode": "\\client\\src\\features\\ToDoList\\TaskCard.tsx",
+  "PreviewInSolutionExplorer": false
+}

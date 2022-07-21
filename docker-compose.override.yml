@@ -1,0 +1,94 @@
+version: '3.4'
+
+services:
+  todotask.api:
+    container_name: todotask.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "DatabaseSettings:ConnectionString=Server=todotaskdb;Port=5432;Database=ToDoTaskDb;User Id=admin;Password=admin1234;"
+      - "IdentityServerOrigin=https://identityserver:443"
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp-web-api.pfx
+    depends_on:
+      - todotaskdb
+      - identityserver
+    ports:
+      - "8000:80" 
+    volumes:
+      - ./Services/ToDoTask/ToDoTask.API:/root/ToDoTask.API:cached
+      - ./Services/ToDoTask/ToDoTask.API/certs:/https/
+
+  todotaskdb:
+    container_name: todotaskdb
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin1234
+      - POSTGRES_DB=ToDoTaskDb
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - todo_data:/var/lib/postgresql/todotaskdb/data/
+
+  identityserverdb:
+    container_name: identityserverdb
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin1234
+      - POSTGRES_DB=IdentityServerDb
+    restart: always
+    expose:
+      - "5430"
+    ports:
+      - "5430:5430"
+    volumes:
+      - identity_data:/var/lib/postgresql/identityserverdb/data/
+    command: -p 5430
+    
+  pgadmin:
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@hotmail.com
+      - PGADMIN_DEFAULT_PASSWORD=admin1234
+    restart: always
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/root/.pgadmin
+      
+  portainer:
+    container_name: portainer
+    restart: always
+    ports: 
+      - "8080:8000"
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+  identityserver:
+    container_name: identityserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - "ConnectionStrings:IdentityServerConnection=Server=identityserverdb;Port=5430;Database=IdentityServerDb;User Id=admin;Password=admin1234;"
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp-identity-server.pfx
+    depends_on:
+      - identityserverdb
+    ports:
+      - "8001:443"
+    volumes:
+      - ./Services/Identity/IdentityServer:/root/IdentityServer:cached
+      - ./Services/Identity/IdentityServer/certs:/https/
+      - type: bind # Using a bind volume as only this single file from `certs` directory should end up in the container.
+        source: ./certs/aspnetapp-root-cert.cer
+        target: /https-root/aspnetapp-root-cert.cer
+    
+  todotask.client:
+    container_name: todotaskclient
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
