@@ -27,33 +27,40 @@ export default function TaskInfoCard({ taskItem }: Props) {
                 <Typography sx={{ fontSize: '1rem'}}>{taskItem.taskName} </Typography>
             </Grid>
 
-            <Grid item sx={{ mb: '0.5rem' }}>
-                <Typography sx={{ fontSize: '0.875rem' }}>{taskItem.description}</Typography>
-            </Grid>
+            {(taskItem.description) ? (
+                <Grid item sx={{ mb: '1rem' }}>
+                    <Typography sx={{ fontSize: '0.875rem' }}>{taskItem.description}</Typography>
+                </Grid>
+            ) : null}
 
             <Grid item>
-                <Box display='flex' sx={{ alignItems: 'center' }} >
+                <Grid container display='flex' flexDirection='column' justifyContent='space-between' >
+                    <Grid item display='flex' gap={1} sx={{ flexWrap: 'wrap', mb: '0.5rem' }}>
+                        {taskItem.label?.map(label =>
+                            <div key={label}>
+                                <Chip label={label} size="small" onClick={() => {
+                                    if (!selectedLabels.includes(label)) {
+                                        dispatch(setSelectedLabels([...selectedLabels, label]));
+                                        dispatch(setTaskItemParams({ labels: [...selectedLabels, label] }));
+                                        dispatch(setTaskListDisplayMode('filter'));
+                                    }
+                                }} />
+                            </div>
+                        )}
+                    </Grid>
+
                     {taskItem.dueDate !== null ? (
-                        <div className="taskCard-date" style={{ display: 'flex'}}>
-                            <EventNoteIcon fontSize="small" sx={{ color: 'grey.600' }}/>
-                            <Typography sx={{ fontSize: '0.875rem' }}>
-                                {dueDate!.toLocaleString(DateTime.DATE_HUGE)}
-                            </Typography>
-                        </div>
+                        <Grid item >
+                            <div className="taskCard-date" style={{ display: 'flex', marginBottom: '0.2rem', alignItems: 'center'}}>
+                                <EventNoteIcon sx={{ color: 'grey.600' }}/>
+                                <Typography sx={{ fontSize: '0.9rem' }}>
+                                    {dueDate!.toLocaleString(DateTime.DATE_HUGE)}
+                                </Typography>
+                            </div>
+                        </Grid>
                     ) : null}
-                    
-                    {taskItem.label?.map(label =>
-                        <div key={label} style={{ marginLeft: '0.5rem' }}>
-                            <Chip label={label} size="small" onClick={() => {
-                                if (!selectedLabels.includes(label)) {
-                                    dispatch(setSelectedLabels([...selectedLabels, label]));
-                                    dispatch(setTaskItemParams({ labels: [...selectedLabels, label] }));
-                                    dispatch(setTaskListDisplayMode('filter'));
-                                }
-                            }} />
-                        </div>
-                    )}
-                </Box>
+
+                </Grid>
             </Grid>
         </Grid>
     );

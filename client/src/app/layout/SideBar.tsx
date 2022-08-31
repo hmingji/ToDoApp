@@ -19,9 +19,10 @@ interface Props {
     displayMode: string,
     handleDisplayModeChange: (mode: string) => void,
     authService: AuthService,
+    darkMode: boolean
 }
 
-export default function SideBar({ open, displayMode, handleDisplayModeChange, authService }: Props) {
+export default function SideBar({ open, displayMode, handleDisplayModeChange, authService, darkMode }: Props) {
     const { labels, priorities, completedTaskQuantity, incompleteTaskQuantity } = useTaskItems(authService);
     const { selectedLabels, selectedPriorities } = useAppSelector(state => state.taskItem);
     const dispatch = useAppDispatch();
@@ -81,7 +82,10 @@ export default function SideBar({ open, displayMode, handleDisplayModeChange, au
                     style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '1rem', alignItems: 'center', paddingTop: '0.2rem' }}
                 >
                     <Button
-                        onClick={() => handleDisplayModeChange('toDoList')}
+                        onClick={() => {
+                            handleResetFilter();
+                            handleDisplayModeChange('toDoList');
+                        }}
                         sx={{ display: 'flex', backgroundColor: (displayMode === 'toDoList') ? 'rgba(25, 118, 220, 0.2)' : 'transparent', justifyContent: 'space-between', "&:hover": { backgroundColor: 'rgba(25, 118, 210, 0.2)' } }}
                         fullWidth
                     >
@@ -101,7 +105,10 @@ export default function SideBar({ open, displayMode, handleDisplayModeChange, au
                     style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '1rem', alignItems: 'center', paddingTop: '0.2rem' }}
                 >
                     <Button
-                        onClick={() => handleDisplayModeChange('completed')}
+                        onClick={() => {
+                            handleResetFilter();
+                            handleDisplayModeChange('completed');
+                        }}
                         sx={{ display: 'flex', backgroundColor: (displayMode === 'completed') ? 'rgba(25, 118, 210, 0.2)' : 'transparent', justifyContent: 'space-between', "&:hover": { backgroundColor: 'rgba(25, 118, 210, 0.2)' } }}
                         fullWidth
                     >
@@ -150,6 +157,7 @@ export default function SideBar({ open, displayMode, handleDisplayModeChange, au
                                 selectedOptions={selectedLabels}
                                 handleOptionSelectOnClick={handleLabelSelectOnClick}
                                 handleOptionRemoveOnClick={handleLabelDeselectOnClick}
+                                darkMode={darkMode}
                             />
                             <Divider sx={{ ml: '1rem' }} />
 
@@ -159,6 +167,7 @@ export default function SideBar({ open, displayMode, handleDisplayModeChange, au
                                 selectedOptions={selectedPriorities}
                                 handleOptionSelectOnClick={handlePrioritySelectOnClick}
                                 handleOptionRemoveOnClick={handlePriorityDeselectOnClick}
+                                darkMode={darkMode}
                             />
                             <Divider sx={{ ml: '1rem' }} />
 

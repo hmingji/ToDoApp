@@ -86,6 +86,7 @@ export default function TaskForm({ taskItem, cancelEdit, authService }: Props) {
     async function handleSubmitData(data: FieldValues) {
         try {
             let response: TaskItem;
+            console.log(data);
             if (taskItem) {
                 response = await agent(authService).Task.updateTask(data);
             } else {
@@ -113,6 +114,7 @@ export default function TaskForm({ taskItem, cancelEdit, authService }: Props) {
     };
 
     useEffect(() => {
+        console.log(isDirty);
         if (taskItem && !isDirty) {
             reset(taskItem);
             if (taskItem.dueDate) {
@@ -138,9 +140,9 @@ export default function TaskForm({ taskItem, cancelEdit, authService }: Props) {
             setValue('status', taskItem.status);
             setValue('id', taskItem.id);
         } else {
-            setValue("assignee", username);
-            setValue("status", "Incomplete");
-            setValue("priority", "None");
+            //setValue("assignee", username);
+            //setValue("status", "Incomplete");
+            //setValue("priority", "None");
         }
         return () => {
             if (!editState) {
@@ -172,6 +174,12 @@ export default function TaskForm({ taskItem, cancelEdit, authService }: Props) {
 
     useEffect(() => setFocus())
 
+    if (!taskItem) {
+        setValue("assignee", username);
+        setValue("status", "Incomplete");
+        setValue("priority", "None");
+    }
+
     return (
         <>
             <form onSubmit={handleSubmit(handleSubmitData)} >
@@ -184,8 +192,55 @@ export default function TaskForm({ taskItem, cancelEdit, authService }: Props) {
                         <AppTextInput control={control} name='description' placeholder='Task Description' multiline={true} rows={2} />
                     </Grid>
 
-                    <Grid container gridTemplateColumns="repeat(15, 1fr)" gap={1} display='grid' >
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'row', gap: '0.5rem' }} gridColumn="span 5">
+                    <Grid container gap={1} display='flex' justifyContent='space-between' flexDirection='row'>
+                        <Grid item sx={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'column', gap: '0.5rem' }} xs={9}>
+                            <Box sx={{ display: 'flex', gap: '0.5rem', justifyContent: 'left', alignItem: 'top' }}>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'row', gap: '0.5rem' }} >
+                                    {(fields.length > 0 && fields !== null) ? fields.map((item, index) => (
+                                        <div key={item.id} >
+                                            <TextField
+                                                {...register(`label[${index}]` as any)}
+                                                variant="outlined"
+                                                size="small"
+                                                placeholder='Task Label'
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <LocalOfferIcon sx={{ color: 'grey.600' }} fontSize="small" />
+                                                        </InputAdornment>
+                                                    ),
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <IconButton className="hidden-button" size='small' onClick={() => remove(index)}>
+                                                                <ClearIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </InputAdornment>
+                                                    )
+                                                }}
+                                                inputProps={{
+                                                    onKeyPress: event => {
+                                                        const { key } = event;
+                                                        if (key === "Enter") {
+                                                            event.preventDefault();
+                                                            event.currentTarget.blur();
+                                                        }
+                                                    }
+                                                }}
+                                                sx={{
+                                                    width: 150,
+                                                    "& .hidden-button": {
+                                                        display: "none"
+                                                    },
+                                                    "&:hover .hidden-button": {
+                                                        display: "flex"
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    )) : null}
+                                </Box>
+                            </Box>
+
 
                             <DesktopDatePicker
                                 value={taskDueDate}
@@ -197,7 +252,7 @@ export default function TaskForm({ taskItem, cancelEdit, authService }: Props) {
                                 open={datePickerOpen}
                                 clearable={true}
                                 renderInput={({ inputRef, inputProps, InputProps }) => (
-                                    <Box display='flex' ref={inputRef} sx={{ border: 1, borderColor: 'grey.400', borderRadius: 1, mr: 1, height: 'fit-content' }} >
+                                    <Box display='flex' ref={inputRef} sx={{ border: 1, borderColor: 'grey.400', borderRadius: 1, mr: 1, height: 'fit-content', maxWidth: '310px' }} >
                                         <ButtonBase onClick={() => setDatePickerOpen(!datePickerOpen)} sx={{ pl: 1, pt: '0.45rem', pb: '0.45rem' }}>
                                             <CalendarTodayTwoToneIcon />
                                             {(taskDueDate) ? (<Typography sx={{ px: 1 }} >{displayDate}</Typography>) : (<Typography sx={{ px: 1, color: 'grey.500' }} >Due Date</Typography>)}
@@ -206,51 +261,9 @@ export default function TaskForm({ taskItem, cancelEdit, authService }: Props) {
                                 )
                                 }
                             />
-                        </Box>
+                        </Grid>
 
-                        <Box sx={{ display: 'flex', gap: '0.5rem', justifyContent: 'left', alignItem: 'top'}} gridColumn="span 7">
-                            {(fields.length > 0) ? (
-                                <Divider orientation="vertical" flexItem />
-                            ) : null}
-
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'row', gap: '0.5rem' }} >
-                                {(fields.length > 0 && fields !== null) ? fields.map((item, index) => (
-                                    <div key={item.id} >    
-                                        <TextField
-                                            {...register(`label[${index}]` as any)}
-                                            variant="outlined"
-                                            size="small"
-                                            placeholder='Task Label'
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <LocalOfferIcon sx={{ color: 'grey.600' }} fontSize="small" />
-                                                    </InputAdornment>
-                                                ),
-                                                endAdornment: (
-                                                    <InputAdornment position="end">
-                                                        <IconButton className="hidden-button" size='small' onClick={() => remove(index)}>
-                                                            <ClearIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                            sx={{
-                                                width: 150,
-                                                "& .hidden-button": {
-                                                    display: "none"
-                                                },
-                                                "&:hover .hidden-button": {
-                                                    display: "flex"
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                )) : null}
-                            </Box>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', justifyContent: 'right' }} gridColumn="span 3">
+                        <Grid item sx={{ display: 'flex', gap: '0.2rem', alignItems: 'flex-end', paddingBottom: '0.825rem' }}>
                             <div style={{ height: '1.4375rem' }}>
                                 <Tooltip title="Add a label">
                                     <IconButton onClick={() => append('', { focusName: `label[${fields.length}]` })}>
@@ -265,7 +278,7 @@ export default function TaskForm({ taskItem, cancelEdit, authService }: Props) {
                                     </IconButton>
                                 </Tooltip>
                             </div>
-                        </Box>
+                        </Grid>
 
                         <Menu anchorEl={anchorEl} open={open} onClose={() => handlePriorityMenuOnClose("")}>
                             {priorityOptions.map(option => {

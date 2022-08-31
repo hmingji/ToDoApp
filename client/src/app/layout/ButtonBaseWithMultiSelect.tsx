@@ -13,11 +13,12 @@ interface Props {
     selectedOptions: string[];
     handleOptionSelectOnClick: (option: string) => void;
     handleOptionRemoveOnClick: (option: string) => void;
+    darkMode: boolean
 }
 
 interface Style extends CSS.Properties { }
 
-export default function ButtonBaseWithMultiSelect({ buttonBaseTitle, menuOptions, selectedOptions, handleOptionRemoveOnClick, handleOptionSelectOnClick }: Props) {
+export default function ButtonBaseWithMultiSelect({ buttonBaseTitle, menuOptions, selectedOptions, handleOptionRemoveOnClick, handleOptionSelectOnClick, darkMode }: Props) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const [overflowActive, setOverflowActive] = useState<boolean>(false);
@@ -147,7 +148,7 @@ export default function ButtonBaseWithMultiSelect({ buttonBaseTitle, menuOptions
                             {(overflowActive && scrollX !== 0) ? (
                                 <Grid
                                     item
-                                    sx={{ position: 'absolute', zIndex: 10, backgroundColor: 'white', boxShadow: '10px 0px 10px 1px #ffffff' }}
+                                    sx={{ position: 'absolute', zIndex: 10, backgroundColor: (darkMode) ? 'black' : 'white', boxShadow: (darkMode) ? '10px 0px 10px 1px #000000' : '10px 0px 10px 1px #ffffff' }}
                                 >
                                     <IconButton
                                         size="small"
@@ -179,7 +180,7 @@ export default function ButtonBaseWithMultiSelect({ buttonBaseTitle, menuOptions
                             {(!overflowActive || scrollEnd) ? null : (
                                 <Grid
                                     item
-                                    sx={{ position: 'absolute', zIndex: 10, right: '50px', backgroundColor: 'white', boxShadow: '-10px 0px 10px 1px #ffffff' }}
+                                    sx={{ position: 'absolute', zIndex: 10, right: '50px', backgroundColor: (darkMode) ? 'black' : 'white', boxShadow: (darkMode) ? '-10px 0px 10px 1px #000000' : '-10px 0px 10px 1px #ffffff' }}
                                 >
                                     <IconButton
                                         size="small"

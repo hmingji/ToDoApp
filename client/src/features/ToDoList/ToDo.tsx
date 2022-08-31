@@ -10,7 +10,8 @@ import { AuthService } from "../../app/services/AuthService";
 
 interface Props {
     drawerOpen: boolean;
-    authService: AuthService
+    authService: AuthService;
+    darkMode: boolean
 }
 
 const displayMode = [
@@ -18,7 +19,7 @@ const displayMode = [
     { mode: 'completed', taskStateFilter: 'Completed' },
     { mode: 'filter', taskStateFilter: 'Incomplete' }
 ]
-export default function ToDo({ drawerOpen, authService }: Props) {
+export default function ToDo({ drawerOpen, authService, darkMode }: Props) {
     const { taskItems } = useTaskItems(authService);
     const { taskListDisplayMode } = useAppSelector(state => state.taskItem);
     const dispatch = useAppDispatch();
@@ -46,6 +47,7 @@ export default function ToDo({ drawerOpen, authService }: Props) {
                 displayMode={taskListDisplayMode}
                 handleDisplayModeChange={handleDisplayModeChange}
                 authService={authService}
+                darkMode={darkMode}
             />
             <Grid
                 container

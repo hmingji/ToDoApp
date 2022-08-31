@@ -108,7 +108,7 @@ export default function Header({ darkMode, handleThemeChange, handleDrawerOpenCh
                         />
                     
                         {(!authService.isAuthenticated()) ?
-                            (<Button onClick={() => authService.signinRedirect()} sx={{ color: 'white' }} >Logins</Button>)
+                            (<Button onClick={() => authService.signinRedirect()} sx={{ color: 'white' }} >Login</Button>)
                             : (<SignedInMenu username={username} authService={authService}/>)
                         }
 
