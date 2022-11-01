@@ -1,7 +1,7 @@
 import { createAsyncThunk, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import agent from "../../app/api/agent";
 import { TaskItem, TaskItemParams } from "../../app/models/TaskItem";
-import { AuthService } from "../../app/services/AuthService";
+import { TaskItemQuantity } from "../../app/models/TaskItemQuantity";
 import { RootState } from "../../app/store/configureStore";
 
 interface TaskItemState {
@@ -33,37 +33,41 @@ function getAxiosParams(taskItemParams: TaskItemParams) {
     return params;
 }
 
-export const fetchTaskItemsQuantityAsync = createAsyncThunk<TaskItem[], AuthService, { state: RootState }>(
+export const fetchTaskItemsQuantityAsync = createAsyncThunk<TaskItemQuantity, void, { state: RootState }>(
     'taskItem/fetchTaskItemsQuantityAsync',
-    async (authService: AuthService, thunkAPI) => {
-        const params = getAxiosParams(initParams());
+    async (_, thunkAPI) => {
+        //const params = getAxiosParams(initParams());
         try {
-            const response = await agent(authService).Task.list(thunkAPI.getState().taskItem.username, params);
-            return response;
+            if (thunkAPI.getState().account.username) {
+                const response = await agent.Task.fetchQuantity(thunkAPI.getState().account.username!);
+                return response;
+            }
         } catch (error: any) {
             return thunkAPI.rejectWithValue({ error: error.data });
         }
     }
 )
 
-export const fetchTaskItemsAsync = createAsyncThunk<TaskItem[], AuthService, { state: RootState }>(
+export const fetchTaskItemsAsync = createAsyncThunk<TaskItem[], void, { state: RootState }>(
     'taskItem/fetchTaskItemsAsync',
-    async (authService: AuthService, thunkAPI) => {
+    async (_, thunkAPI) => {
         const params = getAxiosParams(thunkAPI.getState().taskItem.taskItemParams);
         try {
-            const response = await agent(authService).Task.list(thunkAPI.getState().taskItem.username, params);
-            return response;
+            if (thunkAPI.getState().account.username) {
+                const response = await agent.Task.list(thunkAPI.getState().account.username!, params);
+                return response;
+            }
         } catch (error: any) {
             return thunkAPI.rejectWithValue({ error: error.data });
         }
     }
 )
 
-export const fetchFilters = createAsyncThunk<string[], AuthService, { state: RootState }>(
+export const fetchFilters = createAsyncThunk<string[], void, { state: RootState }>(
     'taskItem/fetchFilters',
-    async (authService: AuthService, thunkAPI) => {
+    async (_, thunkAPI) => {
         try {
-            const response = await agent(authService).Task.fetchFilters(thunkAPI.getState().taskItem.username);
+            const response = await agent.Task.fetchFilters(thunkAPI.getState().taskItem.username);
             return response;
         } catch (error: any) {
             return thunkAPI.rejectWithValue({ error: error.data });
@@ -71,11 +75,11 @@ export const fetchFilters = createAsyncThunk<string[], AuthService, { state: Roo
     }
 )
 
-export const fetchUserInfo = createAsyncThunk<any, AuthService, { state: RootState }>(
+export const fetchUserInfo = createAsyncThunk<any, void, { state: RootState }>(
     'taskItem/fetchUserInfo',
-    async (authService: AuthService, thunkAPI) => {
+    async (_, thunkAPI) => {
         try {
-            const response = await agent(authService).User.fetchUserInfo();
+            const response = await agent.User.fetchUserInfo();
             return response;
         } catch (error: any) {
             return thunkAPI.rejectWithValue({ error: error.data });
@@ -198,8 +202,8 @@ export const taskItemSlice = createSlice({
             state.status = 'pendingFetchTaskItemsQuantity';
         });
         builder.addCase(fetchTaskItemsQuantityAsync.fulfilled, (state, action) => {
-            state.completedTaskQuantity = action.payload.filter(item => item.status === 'Completed').length;
-            state.incompleteTaskQuantity = action.payload.filter(item => item.status === 'Incomplete').length;
+            state.completedTaskQuantity = action.payload.completeTaskQuantity;
+            state.incompleteTaskQuantity = action.payload.incompleteTaskQuantity;
             state.status = 'idle';
             state.taskItemsLoaded = true;
         });

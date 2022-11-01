@@ -7,17 +7,34 @@ interface Props {
     editMode: boolean
 }
 
-export default function TaskAction({ editMode, handleEditModeChange, handleDeleteOnClick }: Props) {
+export default function TaskAction({ 
+    editMode, 
+    handleEditModeChange, 
+    handleDeleteOnClick 
+}: Props) {
     return (
-        <Grid container direction='row' justifyContent='center'>
+        <Grid 
+            container 
+            justifyContent='center'
+        >
             <Tooltip title="Edit task">
-                <IconButton size='small' onClick={() => { handleEditModeChange(); }} disabled={editMode} sx={{ width: '2rem' }}>
+                <IconButton 
+                    size='small' 
+                    onClick={handleEditModeChange} 
+                    disabled={editMode} 
+                    sx={{ width: '2rem' }}
+                >
                     <EditTwoTone fontSize="small"/>
                 </IconButton>
             </Tooltip>
 
             <Tooltip title="Remove task">
-                <IconButton size="small" onClick={handleDeleteOnClick} disabled={editMode} sx={{ width: '2rem' }}>
+                <IconButton 
+                    size="small" 
+                    onClick={handleDeleteOnClick} 
+                    disabled={editMode} 
+                    sx={{ width: '2rem' }}
+                >
                     <DeleteOutlineTwoTone fontSize="small" />
                 </IconButton>
             </Tooltip>

@@ -1,0 +1,19 @@
+.filter-enter {
+    overflow: hidden;
+    max-height: 0px;
+}
+
+.filter-enter-active {
+    max-height : 180px;
+    transition: all 500ms ease-in-out;
+}
+
+.filter-exit {
+    max-height: 180px;
+}
+
+.filter-exit-active {
+    overflow: hidden;
+    max-height: 0px;
+    transition: all 500ms ease-in-out;
+}

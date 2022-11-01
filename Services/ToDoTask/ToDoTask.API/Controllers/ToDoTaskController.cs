@@ -9,6 +9,7 @@ using ToDoTask.API.Repositories.Interfaces;
 using ToDoTask.API.RequestHelpers;
 using ToDoTask.API.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using ToDoTask.API.Repositories;
 
 namespace ToDoTask.API.Controllers
 {
@@ -46,6 +47,20 @@ namespace ToDoTask.API.Controllers
             var filters = await _repository.GetFilters(userName);
             
             return Ok(filters);
+        }
+
+        [HttpGet("quantity/{userName}", Name = "GetQuantity")]
+        //[ProducesResponseType(typeof(TaskItemQuantity), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<TaskItemQuantity>> GetQuantity(string userName)
+        {
+            var quantity = await _repository.GetTaskItemQuantity(userName);
+            
+            return new TaskItemQuantity
+                {
+                    CompleteTaskQuantity = quantity.CompleteTaskQuantity ,
+                    IncompleteTaskQuantity = quantity.IncompleteTaskQuantity,
+                }
+            ;
         }
 
         [HttpPost]

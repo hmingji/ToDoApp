@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { AuthService } from '../services/AuthService';
+import { authService } from '../services/AuthService';
 
 const sleep = () => new Promise(resolve => setTimeout(resolve, 500));
 
@@ -19,56 +19,31 @@ const Task = {
     createTask: (task: any) => requests.post('ToDoTask', task),
     updateTask: (task: any) => requests.put('ToDoTask', task),
     deleteTask: (id: number) => requests.delete(`ToDoTask/${id}`),
-    fetchFilters: (assignee: string) => requests.get(`ToDoTask/filters/${assignee}`)
+    fetchFilters: (assignee: string) => requests.get(`ToDoTask/filters/${assignee}`),
+    fetchQuantity: (assignee: string) => requests.get(`ToDoTask/quantity/${assignee}`),
 }
 
 const User = {
     fetchUserInfo: () => requests.get(`${process.env.REACT_APP_AUTH_URL}connect/userinfo`)
 }
 
-function agent(authService: AuthService) {
-
-    axios.interceptors.request.use(config => {
-        return authService.getUser().then(user => {
-            if (user && user.access_token) {
-                config.headers!.Authorization = `Bearer ${user.access_token}`
-                return config;
-            } else if (user) {
-                authService.renewToken().then(renewedUser => {
-                    config.headers!.Authorization = `Bearer ${renewedUser?.access_token}`
-                    return config;
-                })
-            } else {
-                return config;
-            }
-        });
-    }, (error: AxiosError) => {
-        return authService.getUser().then(user => {
-            if (user && user.access_token && error.response?.status === 401) {
-                return authService.renewToken().then(renewedUser => {
-                    error.config.headers!.Authorization = `Bearer ${renewedUser?.access_token}`
-                    error.config.baseURL = undefined;
-                    return axios.request(error.config);
-                });
-            } else {
-                return Promise.reject(error.response);
-            }
-        });
-
+axios.interceptors.request.use(config => {
+    return authService.getUser().then(user => {
+        if (user && user.access_token) {
+            config.headers!.Authorization = `Bearer ${user.access_token}`
+            return config;
+        }
+        return config;  
     });
+});
 
-    axios.interceptors.response.use(async response => {
-        if (process.env.NODE_ENV === 'development') await sleep();
-        return response;
-    }, (error: AxiosError) => {
-        return Promise.reject(error.response);
-    });
+axios.interceptors.response.use(async response => {
+    if (process.env.NODE_ENV === 'development') await sleep();
+    return response;
+}, (error: AxiosError) => {
+    return Promise.reject(error.response);
+});
 
-    return {
-        Task,
-        User,
-        authService
-    }
-}
+const agent = { Task, User };
 
 export default agent;

@@ -51,6 +51,7 @@ namespace IdentityServer
                     AllowedGrantTypes = GrantTypes.Code,
                     RequirePkce = false,
                     AllowRememberConsent = false,
+                    AllowOfflineAccess = true,
                     RedirectUris = new List<string>()
                     {
                         $"{getClientOrigin()}/signin-oidc",
@@ -67,8 +68,13 @@ namespace IdentityServer
                     AllowedScopes = new List<string>
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile
-                    }
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                    },
+                    AccessTokenLifetime = 3000,
+                    IdentityTokenLifetime = 2000,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    AllowAccessTokensViaBrowser = true,
                 }
             };
             

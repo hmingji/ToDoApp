@@ -2,15 +2,13 @@ import useTaskItems from "../../app/hooks/useTaskItems"
 import { Grid } from "@mui/material";
 import TaskList from "./TaskList";
 import { useMediaQuery } from "usehooks-ts";
-import SideBar from "../../app/layout/SideBar";
+import SideBar from "../../app/layout/SideBar/SideBar";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import { setTaskItemParams, setTaskListDisplayMode } from "./taskItemSlice";
 import { TaskItem } from "../../app/models/TaskItem";
-import { AuthService } from "../../app/services/AuthService";
 
 interface Props {
     drawerOpen: boolean;
-    authService: AuthService;
     darkMode: boolean
 }
 
@@ -19,8 +17,8 @@ const displayMode = [
     { mode: 'completed', taskStateFilter: 'Completed' },
     { mode: 'filter', taskStateFilter: 'Incomplete' }
 ]
-export default function ToDo({ drawerOpen, authService, darkMode }: Props) {
-    const { taskItems } = useTaskItems(authService);
+export default function ToDo({ drawerOpen, darkMode }: Props) {
+    const { taskItems } = useTaskItems();
     const { taskListDisplayMode } = useAppSelector(state => state.taskItem);
     const dispatch = useAppDispatch();
     const matches = useMediaQuery('(min-width: 918px)');
@@ -46,7 +44,6 @@ export default function ToDo({ drawerOpen, authService, darkMode }: Props) {
                 open={drawerOpen}
                 displayMode={taskListDisplayMode}
                 handleDisplayModeChange={handleDisplayModeChange}
-                authService={authService}
                 darkMode={darkMode}
             />
             <Grid
@@ -56,10 +53,7 @@ export default function ToDo({ drawerOpen, authService, darkMode }: Props) {
                 sx={{ pl: (drawerOpen && matches) ? '350px' : '0px' }}
             >
                 <Grid item xs={12}>
-                    <TaskList
-                        taskItems={taskItemsToDisplay}
-                        authService={authService}
-                    />
+                    <TaskList taskItems={taskItemsToDisplay} />
                 </Grid>
             </Grid>
         </>

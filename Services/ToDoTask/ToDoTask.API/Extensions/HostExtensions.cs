@@ -61,10 +61,10 @@ namespace ToDoTask.API.Extensions
                         Connection = connection
                     };
 
-                    command.CommandText = "DROP TABLE IF EXISTS TaskItem";
-                    command.ExecuteNonQuery();
+                    //command.CommandText = "DROP TABLE IF EXISTS TaskItem";
+                    //command.ExecuteNonQuery();
 
-                    command.CommandText = @"CREATE TABLE TaskItem(Id SERIAL PRIMARY KEY,
+                    command.CommandText = @"CREATE TABLE IF NOT EXISTS TaskItem(Id SERIAL PRIMARY KEY,
                                                                     TaskName VARCHAR(24) NOT NULL,
                                                                     Description TEXT,
                                                                     DueDate DATE,

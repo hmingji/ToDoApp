@@ -1,21 +1,23 @@
-import { Container, createTheme, CssBaseline, ThemeProvider, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import Header from "./Header";
+import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { useEffect, useState } from "react";
 import DateAdapter from '@mui/lab/AdapterLuxon';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { Route, Switch } from "react-router";
-import ToDo from "../../features/ToDoList/ToDo";
+import { Route } from "react-router";
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import LuxonUtils from '@date-io/luxon';
 import { useMediaQuery } from "usehooks-ts";
-import { AuthService } from "../services/AuthService";
-import IntroductoryPage from "./IntroductoryPage";
-import { Link } from "react-router-dom";
+import { authService } from "../services/AuthService";
+import Intro from "../pages/Intro";
+import SignInRedirectCallback from "../pages/SignInRedirectCallback";
+import AppLoader from "./AppLoader";
+import SignOutRedirectCallback from "../pages/SignOutRedirectCallback";
+import MainApp from "../pages/MainApp";
+import PageNotFound from "../pages/PageNotFound";
+import { Switch } from "react-router-dom";
 
 function App() {
-    const authService = new AuthService();
     const [darkMode, setDarkMode] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(true);
     const matches = useMediaQuery('(min-width: 918px)');
@@ -42,39 +44,43 @@ function App() {
         setDrawerOpen(!drawerOpen);
     }
 
+    const themeProps = {
+        darkMode: darkMode,
+        handleThemeChange: handleThemeChange,
+    }
+
+    const drawerProps = {
+        drawerOpen: drawerOpen,
+        handleDrawerOpenChange: handleDrawerOpenChange,
+    }
+
+    const mediaQueryProps = {
+        isDesktop: matches,
+    }
+
     return (
         <LocalizationProvider dateAdapter={DateAdapter}>
             <MuiPickersUtilsProvider utils={LuxonUtils}>
                 <ThemeProvider theme={theme}>
                     <ToastContainer position="bottom-left" hideProgressBar theme='colored' /> 
                     <CssBaseline />
-                    <Header darkMode={darkMode} handleThemeChange={handleThemeChange} handleDrawerOpenChange={handleDrawerOpenChange} authService={authService} drawerOpen={drawerOpen} />
-                    <Container sx={{ mt: 10}}>   
+                    <AppLoader>
                         <Switch>
-                            <Route exact path='/' render={() => <IntroductoryPage authService={authService} /> } />
-                            <Route path='/todo' render={() => {
-                                if (!authService.isAuthenticated()) authService.signinRedirect();
-                                authService.getUser();
-                                return <ToDo drawerOpen={drawerOpen} authService={authService} darkMode={darkMode} />
-                            }} />
-                            <Route path='/signin-oidc' render={() => {
-                                authService.getUser();
-                                return null;
-                            }} />
-                            <Route path='/signout-callback-oidc' render={() => {
-                                return <Typography> You have logged out. Click <Link to='/'>here</Link> to go to main page. </Typography>;
-                            }} />
+                            <Route exact path='/' render={() => <Intro {...themeProps} />} />
+                            <Route path='/todo' render={() => <MainApp {...themeProps} {...drawerProps} {...mediaQueryProps} />} />                  
+                            <Route path='/signin-oidc' component={SignInRedirectCallback} />
+                            <Route path='/signout-callback-oidc' render={() => <SignOutRedirectCallback {...themeProps} />} />
                             <Route path='/silent-signin' render={() => {
                                 authService.signinSilentCallback();
-                                authService.getUser();
                                 return null;
                             }} />
+                            <Route render={() => <PageNotFound {...themeProps} />} />
                         </Switch>
-                    </Container>
+                    </AppLoader>
                 </ThemeProvider>
             </MuiPickersUtilsProvider>
         </LocalizationProvider>
-  );
+    );
 }
 
 export default App;

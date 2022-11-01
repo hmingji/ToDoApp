@@ -9,14 +9,12 @@ import TaskInfoCard from "./TaskInfoCard";
 import TaskForm from "./TaskForm";
 import TaskAction from "./TaskAction";
 import { toast } from "react-toastify";
-import { AuthService } from "../../app/services/AuthService";
 
 interface Props {
     taskItem: TaskItem; 
-    authService: AuthService;
 }
 
-export default function TaskCard({ taskItem, authService} : Props) {
+export default function TaskCard({ taskItem } : Props) {
     const dispatch = useAppDispatch();
     const [editMode, setEditMode] = useState(false);
     const [displayWidthMatches, setDisplayWidthMatches] = useState(window.matchMedia("(min-width: 768px)").matches);
@@ -35,7 +33,7 @@ export default function TaskCard({ taskItem, authService} : Props) {
     }
 
     async function handleTaskItemDeleteOnClick(id: number) {
-        await agent(authService).Task.deleteTask(taskItem.id);
+        await agent.Task.deleteTask(taskItem.id);
         dispatch(removeTaskItem(taskItem));
         toast.info('Task removed.');
     }
@@ -53,7 +51,7 @@ export default function TaskCard({ taskItem, authService} : Props) {
                     label: taskItem.label,
                     priority: taskItem.priority
                 }
-                await agent(authService).Task.updateTask(updatedTaskItem);
+                await agent.Task.updateTask(updatedTaskItem);
                 dispatch(setTaskItem(updatedTaskItem));
             } else {
                 const updatedTaskItem: TaskItem = {
@@ -66,7 +64,7 @@ export default function TaskCard({ taskItem, authService} : Props) {
                     label: taskItem.label,
                     priority: taskItem.priority
                 }
-                await agent(authService).Task.updateTask(updatedTaskItem);
+                await agent.Task.updateTask(updatedTaskItem);
                 dispatch(setTaskItem(updatedTaskItem));
             }
         } catch (error: any) {
@@ -79,7 +77,7 @@ export default function TaskCard({ taskItem, authService} : Props) {
         setCardOnMouseOver(false);
     }
 
-    if (editMode) return <TaskForm taskItem={taskItem} cancelEdit={cancelEdit} authService={authService}/>
+    if (editMode) return <TaskForm taskItem={taskItem} cancelEdit={cancelEdit} />
 
     return (
         <Grid

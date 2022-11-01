@@ -1,16 +1,14 @@
 import { Button, Menu, Fade, MenuItem, Avatar, Tooltip, ListItem, Typography, ListItemText, ListItemAvatar, ListItemIcon } from "@mui/material";
 import React from "react";
-import { AuthService } from "../services/AuthService";
+import { authService } from "../services/AuthService";
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 interface Props {
-    username: string;
-    authService: AuthService;
+    username: string | null;
 }
 
-export default function SignedInMenu({ username, authService }: Props) {
-    
+export default function SignedInMenu({ username }: Props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
 
@@ -53,11 +51,7 @@ export default function SignedInMenu({ username, authService }: Props) {
                     </ListItemText>
                 </ListItem>
 
-                <MenuItem
-                    onClick={() => {
-                    authService.logout();
-                    }}
-                >
+                <MenuItem onClick={() => authService.logout()}>
                     <ListItemIcon>
                         <LogoutIcon />
                     </ListItemIcon>
@@ -66,5 +60,4 @@ export default function SignedInMenu({ username, authService }: Props) {
             </Menu>
         </>
     );
-
 }

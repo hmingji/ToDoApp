@@ -105,6 +105,7 @@ namespace IdentityServer
                 {
                     options.ConfigureDbContext = builder => builder.UseNpgsql(connectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
                 });
+            
 
             services.AddSingleton<ICorsPolicyService>((container) => {
                 var logger = container.GetRequiredService<ILogger<DefaultCorsPolicyService>>();
@@ -115,6 +116,8 @@ namespace IdentityServer
             });
 
             services.ConfigureNonBreakingSameSiteCookies();
+            //services.AddAuthentication(x=>x.DefaultAuthenticateScheme = IdentityServer4.IdentityServerConstants.DefaultCookieAuthenticationScheme);
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -188,14 +191,15 @@ namespace IdentityServer
 
                 }
 
-                if (!configDbContext.Clients.Any())
+                if (configDbContext.Clients.Any())
                 {
+                    configDbContext.Clients.RemoveRange(configDbContext.Clients);
                     foreach (var client in Config.Clients(configuration))
                     {
                         configDbContext.Clients.Add(client.ToEntity());
                     }
                     configDbContext.SaveChanges();
-                }
+                } // clean the table regardless
 
                 if (!configDbContext.IdentityResources.Any())
                 {

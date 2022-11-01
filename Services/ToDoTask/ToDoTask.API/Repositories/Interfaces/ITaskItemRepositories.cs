@@ -12,5 +12,6 @@ namespace ToDoTask.API.Repositories.Interfaces
         Task<bool> DeleteTaskItem(int id);
         Task<bool> CreateTaskItem(TaskItem task);
         Task<List<string>> GetFilters(string userName);
+        Task<TaskItemQuantity> GetTaskItemQuantity(string userName);
     }
 }

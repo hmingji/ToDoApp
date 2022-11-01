@@ -17,12 +17,10 @@ import { LoadingButton, DesktopDatePicker } from "@mui/lab";
 import { DateTime } from "luxon";
 import CalendarTodayTwoToneIcon from '@mui/icons-material/CalendarTodayTwoTone';
 import { toast } from "react-toastify";
-import { AuthService } from "../../app/services/AuthService";
 
 interface Props {
     taskItem?: TaskItem;
     cancelEdit: () => void;
-    authService: AuthService;
 }
 
 const priorityOptions = [
@@ -32,8 +30,8 @@ const priorityOptions = [
     { value: 'Low', color: 'green' }
 ]
 
-export default function TaskForm({ taskItem, cancelEdit, authService }: Props) {
-    const { username } = useAppSelector(state => state.taskItem);
+export default function TaskForm({ taskItem, cancelEdit }: Props) {
+    const { username } = useAppSelector(state => state.account);
     const dispatch = useAppDispatch();
     const { register, control, reset, handleSubmit, setValue, formState: { isDirty, isSubmitting}, getValues } = useForm({
         mode: 'onSubmit',
@@ -85,12 +83,12 @@ export default function TaskForm({ taskItem, cancelEdit, authService }: Props) {
 
     async function handleSubmitData(data: FieldValues) {
         try {
-            let response: TaskItem;
+            let response: TaskItem;  
             console.log(data);
             if (taskItem) {
-                response = await agent(authService).Task.updateTask(data);
+                response = await agent.Task.updateTask(data);
             } else {
-                response = await agent(authService).Task.createTask(data);
+                response = await agent.Task.createTask(data);
             }
             dispatch(setTaskItem(response));
             cancelEdit();

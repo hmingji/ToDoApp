@@ -1,0 +1,8 @@
+.selectedOptionsContainer {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.selectedOptionsContainer::-webkit-scrollbar {
+    display: none;
+}

@@ -7,7 +7,7 @@ interface Props {
 
 export default function LoadingComponent({ message = 'Loading...' }: Props) {
     return (
-        <Backdrop open={true} invisible={true}>
+        <Backdrop open={true} invisible={false} sx={{ backgroundColor : 'white' }}>
             <Box display='flex' justifyContent='center' alignItems='center' height='100vh'>
                 <CircularProgress size={30} color='primary' />
                 <Typography variant='subtitle1' sx={{ justifyContent: 'center', position: 'fixed', top: '52%' }}>

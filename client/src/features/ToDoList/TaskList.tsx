@@ -9,11 +9,9 @@ import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import { setTaskItemCreateMode, setTaskItemParams } from "./taskItemSlice";
 import SortIcon from '@mui/icons-material/Sort';
 import { Check } from "@mui/icons-material";
-import { AuthService } from "../../app/services/AuthService";
 
 interface Props {
     taskItems: TaskItem[];
-    authService: AuthService;
 }
 
 const sortOptions = [
@@ -22,7 +20,7 @@ const sortOptions = [
     { label: 'Due Date', value: 'dueDate' }
 ]
 
-export default function TaskList({ taskItems, authService }: Props) {
+export default function TaskList({ taskItems }: Props) {
     const [createButtonOnHover, setCreateButtonOnHover] = useState<boolean>(false);
     const { taskItemCreateMode, taskItemParams, taskListDisplayMode } = useAppSelector(state => state.taskItem);
     const dispatch = useAppDispatch();
@@ -88,13 +86,13 @@ export default function TaskList({ taskItems, authService }: Props) {
             
                 {taskItems.map(taskItem => (
                     <Grid item xs={12} key={taskItem.id}>
-                        <TaskCard taskItem={taskItem} key={taskItem.id} authService={authService}/>   
+                        <TaskCard taskItem={taskItem} key={taskItem.id} />   
                     </Grid>
                 ))}
 
                 {taskItemCreateMode &&
                     <Grid item xs={12} >
-                        <TaskForm cancelEdit={() => dispatch(setTaskItemCreateMode(false))} authService={authService}/>
+                        <TaskForm cancelEdit={() => dispatch(setTaskItemCreateMode(false))} />
                     </Grid>
                 }
 

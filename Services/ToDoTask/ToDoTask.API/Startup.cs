@@ -59,7 +59,8 @@ namespace ToDoTask.API
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateAudience = false,
-                        ValidateIssuer = false
+                        ValidateIssuer = false,
+                        ClockSkew = TimeSpan.Zero,
                     };
                 });
 

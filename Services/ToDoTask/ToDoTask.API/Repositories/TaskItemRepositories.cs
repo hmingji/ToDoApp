@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ToDoTask.API.Entities;
 using ToDoTask.API.Repositories.Interfaces;
+using ToDoTask.API.Repositories;
 
 namespace ToDoTask.API.Repositories
 {
@@ -114,6 +115,24 @@ namespace ToDoTask.API.Repositories
             List<string> filters = new List<string>(await connection.QueryAsync<string>("SELECT DISTINCT(unnest(TaskItem.Label)) FROM TaskItem WHERE Assignee=@UserName", new { UserName = userName }));
 
             return filters;
+        }
+
+        public async Task<TaskItemQuantity> GetTaskItemQuantity(string userName)
+        {
+            using var connection = new NpgsqlConnection
+                (getDbConnStr());
+            
+
+            IEnumerable<int> completedQuantity = await connection.QueryAsync<int>("SELECT COUNT(Id) FROM TaskItem WHERE Assignee = @UserName AND Status = @Complete", new { UserName = userName, Complete = "Completed" });
+            IEnumerable<int> incompletedQuantity = await connection.QueryAsync<int>("SELECT COUNT(Id) FROM TaskItem WHERE Assignee = @UserName AND Status = @Incomplete", new { UserName = userName, Incomplete = "Incomplete" });
+ 
+            Console.WriteLine(completedQuantity.FirstOrDefault());
+            Console.WriteLine(incompletedQuantity.FirstOrDefault());
+            
+            return new TaskItemQuantity{
+                CompleteTaskQuantity = completedQuantity.FirstOrDefault(), 
+                IncompleteTaskQuantity = incompletedQuantity.FirstOrDefault()
+            };
         }
     }
 }
