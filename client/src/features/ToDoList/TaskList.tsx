@@ -32,7 +32,11 @@ export default function TaskList({ taskItems }: Props) {
         setAnchorEl(event.currentTarget);
     }
 
-    if (taskItems.length === 0 && (taskItemParams.dueDate || taskItemParams.labels.length > 0 || taskItemParams.priorities.length > 0 || taskItemParams.searchTerm))
+    if (taskItems.length === 0 && (
+        taskItemParams.dueDate || 
+        taskItemParams.labels.length > 0 || 
+        taskItemParams.priorities.length > 0 || 
+        taskItemParams.searchTerm))
         return <Typography variant="subtitle1">Opsss.. There is no task matches. </Typography>
 
     return (
@@ -79,11 +83,9 @@ export default function TaskList({ taskItems }: Props) {
                         )
                     })}
                 </Menu>
-
             </Box>
 
             <Grid container rowSpacing={0.5}>
-            
                 {taskItems.map(taskItem => (
                     <Grid item xs={12} key={taskItem.id}>
                         <TaskCard taskItem={taskItem} key={taskItem.id} />   

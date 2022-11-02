@@ -1,5 +1,5 @@
 export interface TaskItem {
-    id: number;
+    id?: number;
     taskName: string;
     description?: string;
     dueDate?: Date;

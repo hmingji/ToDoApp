@@ -2,8 +2,8 @@ import { TaskItem } from "../../app/models/TaskItem";
 import { FieldValues, useFieldArray, useForm } from "react-hook-form";
 import { validationSchema } from "./taskItemValidation";
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useEffect, useState } from "react";
-import { Box, Grid, Button, IconButton, TextField, InputAdornment, Menu, MenuItem, ButtonBase, Typography, Tooltip, Divider } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import { Box, Grid, Button, IconButton, TextField, InputAdornment, Menu, MenuItem, ButtonBase, Typography, Tooltip, } from "@mui/material";
 import AppTextInput from "../../app/components/AppTextInput";
 import AddIcon from '@mui/icons-material/Add';
 import React from 'react';
@@ -36,19 +36,21 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
     const { register, control, reset, handleSubmit, setValue, formState: { isDirty, isSubmitting}, getValues } = useForm({
         mode: 'onSubmit',
         resolver: yupResolver<any>(validationSchema),
-        shouldUnregister: false   
+        shouldUnregister: false
     });
+
     const { fields, append, remove } = useFieldArray({
         control: control,
         name: "label"
     });
+
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
-    const [priorityFlagColor, setPriorityFlagColor] = useState<string>('grey');
     const [displayDate, setDisplayDate] = useState<string | undefined>(undefined);
     const [datePickerOpen, setDatePickerOpen] = useState(false);
     const [taskDueDate, setTaskDueDate] = useState<Date | undefined>(undefined);
     const [editState, setEditState] = useState(true);
+    const executeRef = useRef(false);
     //const htmlElRef = useRef<any>(null);
 
     const handlePriorityMenuOnClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -58,20 +60,6 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
     const handlePriorityMenuOnClose = (option: string) => {
         if (option !== "") {
             setValue("priority", option);
-            setPriorityFlagColor(color => {
-                switch (option) {
-                    case "Critical":
-                        return 'red';
-                    case "High":
-                        return 'orange';
-                    case "Moderate":
-                        return 'yellow';
-                    case "Low":
-                        return 'green';
-                    default:
-                        return 'grey';
-                }
-            })
         }
         setAnchorEl(null);
     }
@@ -83,16 +71,17 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
 
     async function handleSubmitData(data: FieldValues) {
         try {
-            let response: TaskItem;  
+            //let response: TaskItem;  
+            // console.log(data);
+            // if (taskItem) {
+            //     response = await agent.Task.updateTask(data);
+            // } else {
+            //     response = await agent.Task.createTask(data);
+            // }
+            // dispatch(setTaskItem(response));
             console.log(data);
-            if (taskItem) {
-                response = await agent.Task.updateTask(data);
-            } else {
-                response = await agent.Task.createTask(data);
-            }
-            dispatch(setTaskItem(response));
-            cancelEdit();
-            toast.success('Submit successfully.');
+            //cancelEdit();
+            //toast.success('Submit successfully.');
         } catch (error: any) {
             console.log(error);
             toast.error(error);
@@ -111,58 +100,95 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
         });
     };
 
-    useEffect(() => {
-        console.log(isDirty);
-        if (taskItem && !isDirty) {
-            reset(taskItem);
-            if (taskItem.dueDate) {
-                setTaskDueDate(taskItem.dueDate);
-                setValue('dueDate', taskItem.dueDate);
-            }
-            setPriorityFlagColor(color => {
-                switch (taskItem.priority) {
-                    case "Critical":
-                        return 'red';
-                    case "High":
-                        return 'orange';
-                    case "Moderate":
-                        return 'yellow';
-                    case "Low":
-                        return 'green';
-                    default:
-                        return 'grey';
+    function resetForm(taskItem: TaskItem | undefined) {
+        if (taskItem) {
+            console.log("running the reset")
+            Object.entries(taskItem).forEach(([key, value]) => {
+                if (value) {
+                    register(key, { value: value }); 
+                    setValue(key, value);
                 }
-            });
-            if (taskItem.priority) setValue('priority', taskItem.priority);
-            setValue('assignee', username);
-            setValue('status', taskItem.status);
-            setValue('id', taskItem.id);
+            })
         } else {
-            //setValue("assignee", username);
-            //setValue("status", "Incomplete");
-            //setValue("priority", "None");
+            register('assignee', { value: username });
+            register('status', { value: 'Incomplete' });
         }
-        return () => {
-            if (!editState) {
-                console.log("cleanning...");
-                setTaskDueDate(taskItem?.dueDate);
-                setPriorityFlagColor(color => {
-                    switch (taskItem?.priority) {
-                        case "Critical":
-                            return 'red';
-                        case "High":
-                            return 'orange';
-                        case "Moderate":
-                            return 'yellow';
-                        case "Low":
-                            return 'green';
-                        default:
-                            return 'grey';
-                    }
-                });
-            }
+    }
+
+    function getPriorityFlagColor(priority: string) {
+        switch (priority) {
+            case "Critical":
+                return 'red';
+            case "High":
+                return 'orange';
+            case "Moderate":
+                return 'yellow';
+            case "Low":
+                return 'green';
+            default:
+                return 'grey';
         }
-    }, [taskItem, reset, isDirty]);
+    }
+
+    useEffect(() => {
+        if (executeRef.current) return;
+        resetForm(taskItem);
+        executeRef.current = true;
+    }, [])
+
+    // useEffect(() => {
+    //     console.log(isDirty);
+    //     if (taskItem && !isDirty) {
+    //         reset(taskItem);
+    //         if (taskItem.dueDate) {
+    //             setTaskDueDate(taskItem.dueDate);
+    //             register('dueDate', { value:taskItem.dueDate});
+    //             //setValue('dueDate', taskItem.dueDate);
+    //         }
+    //         setPriorityFlagColor(color => {
+    //             switch (taskItem.priority) {
+    //                 case "Critical":
+    //                     return 'red';
+    //                 case "High":
+    //                     return 'orange';
+    //                 case "Moderate":
+    //                     return 'yellow';
+    //                 case "Low":
+    //                     return 'green';
+    //                 default:
+    //                     return 'grey';
+    //             }
+    //         });
+    //         if (taskItem.priority) setValue('priority', taskItem.priority);
+    //         setValue('assignee', username);
+    //         setValue('status', taskItem.status);
+    //         setValue('id', taskItem.id);
+    //     } else {
+    //         //setValue("assignee", username);
+    //         //setValue("status", "Incomplete");
+    //         //setValue("priority", "None");
+    //     }
+    //     return () => {
+    //         if (!editState) {
+    //             console.log("cleanning...");
+    //             setTaskDueDate(taskItem?.dueDate);
+    //             setPriorityFlagColor(color => {
+    //                 switch (taskItem?.priority) {
+    //                     case "Critical":
+    //                         return 'red';
+    //                     case "High":
+    //                         return 'orange';
+    //                     case "Moderate":
+    //                         return 'yellow';
+    //                     case "Low":
+    //                         return 'green';
+    //                     default:
+    //                         return 'grey';
+    //                 }
+    //             });
+    //         }
+    //     }
+    // }, [taskItem, reset, isDirty]);
 
     useEffect(() => {
         if (taskDueDate) {
@@ -172,11 +198,11 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
 
     useEffect(() => setFocus())
 
-    if (!taskItem) {
-        setValue("assignee", username);
-        setValue("status", "Incomplete");
-        setValue("priority", "None");
-    }
+    // if (!taskItem) {
+    //     setValue("assignee", username);
+    //     setValue("status", "Incomplete");
+    //     setValue("priority", "None");
+    // }
 
     return (
         <>
@@ -271,8 +297,8 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
                             </div>
                             <div style={{ height: '1.4375rem' }}>
                                 <Tooltip title="Set task priority">
-                                    <IconButton onClick={handlePriorityMenuOnClick} sx={{ color: priorityFlagColor }}>
-                                        <FlagIcon sx={{ color: priorityFlagColor }} />
+                                    <IconButton onClick={handlePriorityMenuOnClick} sx={{ color: getPriorityFlagColor(getValues('priority')) }}>
+                                        <FlagIcon sx={{ color: getPriorityFlagColor(getValues('priority')) }} />
                                     </IconButton>
                                 </Tooltip>
                             </div>

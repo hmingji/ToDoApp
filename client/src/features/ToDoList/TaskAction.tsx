@@ -14,7 +14,7 @@ export default function TaskAction({
 }: Props) {
     return (
         <Grid 
-            container 
+            container
             justifyContent='center'
         >
             <Tooltip title="Edit task">

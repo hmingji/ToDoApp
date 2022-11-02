@@ -12,9 +12,6 @@ interface TaskItemState {
     labels: string[];
     taskItemParams: TaskItemParams;
     taskItemCreateMode: boolean;
-    selectedLabels: string[];
-    selectedPriorities: string[];
-    username: string;
     taskListDisplayMode: string;
     completedTaskQuantity: number;
     incompleteTaskQuantity: number
@@ -36,7 +33,6 @@ function getAxiosParams(taskItemParams: TaskItemParams) {
 export const fetchTaskItemsQuantityAsync = createAsyncThunk<TaskItemQuantity, void, { state: RootState }>(
     'taskItem/fetchTaskItemsQuantityAsync',
     async (_, thunkAPI) => {
-        //const params = getAxiosParams(initParams());
         try {
             if (thunkAPI.getState().account.username) {
                 const response = await agent.Task.fetchQuantity(thunkAPI.getState().account.username!);
@@ -67,20 +63,10 @@ export const fetchFilters = createAsyncThunk<string[], void, { state: RootState 
     'taskItem/fetchFilters',
     async (_, thunkAPI) => {
         try {
-            const response = await agent.Task.fetchFilters(thunkAPI.getState().taskItem.username);
-            return response;
-        } catch (error: any) {
-            return thunkAPI.rejectWithValue({ error: error.data });
-        }
-    }
-)
-
-export const fetchUserInfo = createAsyncThunk<any, void, { state: RootState }>(
-    'taskItem/fetchUserInfo',
-    async (_, thunkAPI) => {
-        try {
-            const response = await agent.User.fetchUserInfo();
-            return response;
+            if (thunkAPI.getState().account.username) {
+                const response = await agent.Task.fetchFilters(thunkAPI.getState().account.username!);
+                return response;
+            }
         } catch (error: any) {
             return thunkAPI.rejectWithValue({ error: error.data });
         }
@@ -106,9 +92,6 @@ export const taskItemSlice = createSlice({
         labels: [],
         taskItemParams: initParams(),
         taskItemCreateMode: false,
-        selectedLabels: [],
-        selectedPriorities: [],
-        username: '',
         taskListDisplayMode: 'toDoList',
         completedTaskQuantity: 0,
         incompleteTaskQuantity: 0
@@ -117,14 +100,10 @@ export const taskItemSlice = createSlice({
         setTaskItemParams: (state, action) => {
             state.taskItemsLoaded = false;
             state.taskItemParams = { ...state.taskItemParams, ...action.payload };
-            console.log(state.taskItemParams);
         },
         resetTaskItemParams: (state) => {
             state.taskItemsLoaded = false;
             state.taskItemParams = initParams();
-            state.selectedLabels = [];
-            state.selectedPriorities = [];
-            console.log(state.taskItemParams);
         },
         setTaskItem: (state, action) => {
             taskItemsAdapter.upsertOne(state, action.payload);
@@ -141,12 +120,6 @@ export const taskItemSlice = createSlice({
         },
         setTaskListDisplayMode: (state, action) => {
             state.taskListDisplayMode = action.payload;
-        },
-        setSelectedLabels: (state, action) => {
-            state.selectedLabels = [...action.payload];
-        },
-        setSelectedPriorities: (state, action) => {
-            state.selectedPriorities = [...action.payload];
         },
         removeTaskItemParams: (state, action) => {
             state.taskItemsLoaded = false;
@@ -187,17 +160,6 @@ export const taskItemSlice = createSlice({
             state.status = 'idle';
             console.log(action.payload);
         });
-        builder.addCase(fetchUserInfo.pending, (state) => {
-            state.status = 'pendingUserInfo';
-        });
-        builder.addCase(fetchUserInfo.fulfilled, (state, action) => {
-            state.username = action.payload.preferred_username;
-            state.status = 'idle';
-        });
-        builder.addCase(fetchUserInfo.rejected, (state, action) => {
-            state.status = 'idle';
-            console.log(action.payload);
-        });
         builder.addCase(fetchTaskItemsQuantityAsync.pending, (state) => {
             state.status = 'pendingFetchTaskItemsQuantity';
         });
@@ -216,4 +178,4 @@ export const taskItemSlice = createSlice({
 
 export const taskItemSelector = taskItemsAdapter.getSelectors((state: RootState) => state.taskItem);
 
-export const { setTaskItemParams, resetTaskItemParams, setTaskItem, removeTaskItem, setTaskItemCreateMode, setSelectedLabels, setSelectedPriorities, removeTaskItemParams, setTaskListDisplayMode } = taskItemSlice.actions;
+export const { setTaskItemParams, resetTaskItemParams, setTaskItem, removeTaskItem, setTaskItemCreateMode, removeTaskItemParams, setTaskListDisplayMode } = taskItemSlice.actions;
