@@ -3,7 +3,7 @@ import { FieldValues, useFieldArray, useForm } from "react-hook-form";
 import { validationSchema } from "./taskItemValidation";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect, useRef, useState } from "react";
-import { Box, Grid, Button, IconButton, TextField, InputAdornment, Menu, MenuItem, ButtonBase, Typography, Tooltip, } from "@mui/material";
+import { Box, Grid, Button, IconButton, TextField, InputAdornment, Menu, MenuItem, ButtonBase, Typography, Tooltip } from "@mui/material";
 import AppTextInput from "../../app/components/AppTextInput";
 import AddIcon from '@mui/icons-material/Add';
 import React from 'react';
@@ -32,26 +32,23 @@ const priorityOptions = [
 
 export default function TaskForm({ taskItem, cancelEdit }: Props) {
     const { username } = useAppSelector(state => state.account);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+    const [datePickerOpen, setDatePickerOpen] = useState(false);
+    const executeRef = useRef(false);
+    const formElementRef = useRef<HTMLFormElement | null>(null);
     const dispatch = useAppDispatch();
-    const { register, control, reset, handleSubmit, setValue, formState: { isDirty, isSubmitting}, getValues } = useForm({
+    
+    const { register, control, handleSubmit, setValue, getValues, formState: { isSubmitting}, getFieldState } = useForm({
         mode: 'onSubmit',
         resolver: yupResolver<any>(validationSchema),
         shouldUnregister: false
     });
-
+    const { error } = getFieldState('label'); 
     const { fields, append, remove } = useFieldArray({
         control: control,
-        name: "label"
+        name: "label",
     });
-
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const open = Boolean(anchorEl);
-    const [displayDate, setDisplayDate] = useState<string | undefined>(undefined);
-    const [datePickerOpen, setDatePickerOpen] = useState(false);
-    const [taskDueDate, setTaskDueDate] = useState<Date | undefined>(undefined);
-    const [editState, setEditState] = useState(true);
-    const executeRef = useRef(false);
-    //const htmlElRef = useRef<any>(null);
 
     const handlePriorityMenuOnClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -65,34 +62,30 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
     }
 
     const handleOnChange = (value: Date) => {
-        setTaskDueDate(value);
         setValue('dueDate', value, { shouldValidate: true });
     }
 
     async function handleSubmitData(data: FieldValues) {
         try {
-            //let response: TaskItem;  
-            // console.log(data);
-            // if (taskItem) {
-            //     response = await agent.Task.updateTask(data);
-            // } else {
-            //     response = await agent.Task.createTask(data);
-            // }
-            // dispatch(setTaskItem(response));
-            console.log(data);
-            //cancelEdit();
-            //toast.success('Submit successfully.');
+            let response: TaskItem;  
+            if (taskItem) {
+                response = await agent.Task.updateTask(data);
+            } else {
+                response = await agent.Task.createTask(data);
+            }
+            dispatch(setTaskItem(response));
+            cancelEdit();
+            toast.success('Submit successfully.');
         } catch (error: any) {
             console.log(error);
             toast.error(error);
         }
     }
 
-    const setFocus = () => {
-        var element = document.getElementById('taskForm');
-        var headerOffset = 120;
-        var elementPosition = element!.getBoundingClientRect().top;
-        var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    function scrollToView(element: HTMLFormElement) {
+        const headerOffset = 120;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
         window.scrollTo({
             top: offsetPosition,
@@ -102,7 +95,6 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
 
     function resetForm(taskItem: TaskItem | undefined) {
         if (taskItem) {
-            console.log("running the reset")
             Object.entries(taskItem).forEach(([key, value]) => {
                 if (value) {
                     register(key, { value: value }); 
@@ -133,200 +125,173 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
     useEffect(() => {
         if (executeRef.current) return;
         resetForm(taskItem);
+        if (formElementRef.current) scrollToView(formElementRef.current);
         executeRef.current = true;
-    }, [])
-
-    // useEffect(() => {
-    //     console.log(isDirty);
-    //     if (taskItem && !isDirty) {
-    //         reset(taskItem);
-    //         if (taskItem.dueDate) {
-    //             setTaskDueDate(taskItem.dueDate);
-    //             register('dueDate', { value:taskItem.dueDate});
-    //             //setValue('dueDate', taskItem.dueDate);
-    //         }
-    //         setPriorityFlagColor(color => {
-    //             switch (taskItem.priority) {
-    //                 case "Critical":
-    //                     return 'red';
-    //                 case "High":
-    //                     return 'orange';
-    //                 case "Moderate":
-    //                     return 'yellow';
-    //                 case "Low":
-    //                     return 'green';
-    //                 default:
-    //                     return 'grey';
-    //             }
-    //         });
-    //         if (taskItem.priority) setValue('priority', taskItem.priority);
-    //         setValue('assignee', username);
-    //         setValue('status', taskItem.status);
-    //         setValue('id', taskItem.id);
-    //     } else {
-    //         //setValue("assignee", username);
-    //         //setValue("status", "Incomplete");
-    //         //setValue("priority", "None");
-    //     }
-    //     return () => {
-    //         if (!editState) {
-    //             console.log("cleanning...");
-    //             setTaskDueDate(taskItem?.dueDate);
-    //             setPriorityFlagColor(color => {
-    //                 switch (taskItem?.priority) {
-    //                     case "Critical":
-    //                         return 'red';
-    //                     case "High":
-    //                         return 'orange';
-    //                     case "Moderate":
-    //                         return 'yellow';
-    //                     case "Low":
-    //                         return 'green';
-    //                     default:
-    //                         return 'grey';
-    //                 }
-    //             });
-    //         }
-    //     }
-    // }, [taskItem, reset, isDirty]);
-
-    useEffect(() => {
-        if (taskDueDate) {
-            setDisplayDate(DateTime.fromJSDate(new Date(taskDueDate)).toLocaleString(DateTime.DATE_HUGE));
-        }
-    }, [setDisplayDate, taskDueDate])
-
-    useEffect(() => setFocus())
-
-    // if (!taskItem) {
-    //     setValue("assignee", username);
-    //     setValue("status", "Incomplete");
-    //     setValue("priority", "None");
-    // }
+    })
 
     return (
-        <>
-            <form onSubmit={handleSubmit(handleSubmitData)} >
-                <Grid container display='flex' direction='column' sx={{ border: 1, borderColor: 'grey.400', borderRadius: 1, padding: 1 }} /*ref={htmlElRef}*/ id="taskForm">
-                    <Grid item>
-                        <AppTextInput control={control} name='taskName' placeholder='Task Title' />
-                    </Grid>
-
-                    <Grid item>
-                        <AppTextInput control={control} name='description' placeholder='Task Description' multiline={true} rows={2} />
-                    </Grid>
-
-                    <Grid container gap={1} display='flex' justifyContent='space-between' flexDirection='row'>
-                        <Grid item sx={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'column', gap: '0.5rem' }} xs={9}>
-                            <Box sx={{ display: 'flex', gap: '0.5rem', justifyContent: 'left', alignItem: 'top' }}>
-                                <Box sx={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'row', gap: '0.5rem' }} >
-                                    {(fields.length > 0 && fields !== null) ? fields.map((item, index) => (
-                                        <div key={item.id} >
-                                            <TextField
-                                                {...register(`label[${index}]` as any)}
-                                                variant="outlined"
-                                                size="small"
-                                                placeholder='Task Label'
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <LocalOfferIcon sx={{ color: 'grey.600' }} fontSize="small" />
-                                                        </InputAdornment>
-                                                    ),
-                                                    endAdornment: (
-                                                        <InputAdornment position="end">
-                                                            <IconButton className="hidden-button" size='small' onClick={() => remove(index)}>
-                                                                <ClearIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </InputAdornment>
-                                                    )
-                                                }}
-                                                inputProps={{
-                                                    onKeyPress: event => {
-                                                        const { key } = event;
-                                                        if (key === "Enter") {
-                                                            event.preventDefault();
-                                                            event.currentTarget.blur();
-                                                        }
-                                                    }
-                                                }}
-                                                sx={{
-                                                    width: 150,
-                                                    "& .hidden-button": {
-                                                        display: "none"
-                                                    },
-                                                    "&:hover .hidden-button": {
-                                                        display: "flex"
-                                                    }
-                                                }}
-                                            />
-                                        </div>
-                                    )) : null}
-                                </Box>
-                            </Box>
-
-
-                            <DesktopDatePicker
-                                value={taskDueDate}
-                                onChange={(date) => {
-                                    handleOnChange(date!);
-                                    setDisplayDate(DateTime.fromJSDate(new Date(date as Date)).toLocaleString(DateTime.DATE_HUGE));
-                                    setDatePickerOpen(!datePickerOpen);
-                                }}
-                                open={datePickerOpen}
-                                clearable={true}
-                                renderInput={({ inputRef, inputProps, InputProps }) => (
-                                    <Box display='flex' ref={inputRef} sx={{ border: 1, borderColor: 'grey.400', borderRadius: 1, mr: 1, height: 'fit-content', maxWidth: '310px' }} >
-                                        <ButtonBase onClick={() => setDatePickerOpen(!datePickerOpen)} sx={{ pl: 1, pt: '0.45rem', pb: '0.45rem' }}>
-                                            <CalendarTodayTwoToneIcon />
-                                            {(taskDueDate) ? (<Typography sx={{ px: 1 }} >{displayDate}</Typography>) : (<Typography sx={{ px: 1, color: 'grey.500' }} >Due Date</Typography>)}
-                                        </ButtonBase>
-                                    </Box>
-                                )
-                                }
-                            />
-                        </Grid>
-
-                        <Grid item sx={{ display: 'flex', gap: '0.2rem', alignItems: 'flex-end', paddingBottom: '0.825rem' }}>
-                            <div style={{ height: '1.4375rem' }}>
-                                <Tooltip title="Add a label">
-                                    <IconButton onClick={() => append('', { focusName: `label[${fields.length}]` })}>
-                                        <AddIcon />
-                                    </IconButton>
-                                </Tooltip>
-                            </div>
-                            <div style={{ height: '1.4375rem' }}>
-                                <Tooltip title="Set task priority">
-                                    <IconButton onClick={handlePriorityMenuOnClick} sx={{ color: getPriorityFlagColor(getValues('priority')) }}>
-                                        <FlagIcon sx={{ color: getPriorityFlagColor(getValues('priority')) }} />
-                                    </IconButton>
-                                </Tooltip>
-                            </div>
-                        </Grid>
-
-                        <Menu anchorEl={anchorEl} open={open} onClose={() => handlePriorityMenuOnClose("")}>
-                            {priorityOptions.map(option => {
-                                return (
-                                    <MenuItem key={option.value} onClick={() => handlePriorityMenuOnClose(option.value)}>
-                                        {option.value}
-                                    </MenuItem>
-                                )
-                            })}
-                        </Menu>    
-                    </Grid>
-
+        <form 
+            onSubmit={handleSubmit(handleSubmitData)} 
+            ref={formElementRef}
+        >
+            <Grid 
+                container 
+                display='flex' 
+                direction='column'
+                sx={{ border: 1, borderColor: 'grey.400', borderRadius: 1, padding: 1 }}
+            >
+                <Grid item>
+                    <AppTextInput 
+                        control={control} 
+                        name='taskName' 
+                        placeholder='Task Title' 
+                    />
                 </Grid>
 
-                <Box sx={{ display: 'inline-flex', flexDirection: 'row', marginTop: '0.25rem', gap: '0.5rem' }}>
-                    <LoadingButton loading={isSubmitting} type='submit' variant='contained'>Submit</LoadingButton>
-                    <Button onClick={() => {
-                        cancelEdit();
-                        setEditState(false);
-                    }}
-                        variant='contained'
-                        color='inherit'>Cancel</Button>
-                </Box>
-            </form>
-        </>
+                <Grid item>
+                    <AppTextInput 
+                        control={control} 
+                        name='description' 
+                        placeholder='Task Description' 
+                        multiline={true} 
+                        rows={2} 
+                    />
+                </Grid>
+
+                <Grid 
+                    container 
+                    gap={1} 
+                    display='flex' 
+                    justifyContent='space-between' 
+                    flexDirection='row'
+                >
+                    <Grid item xs={9}>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'row', gap: '0.5rem' }} >
+                            {(fields.length > 0 && fields !== null) ? fields.map((item, index) => (
+                                <TextField
+                                    key={item.id}
+                                    {...register(`label[${index}]` as any)}
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder='Task Label'
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <LocalOfferIcon sx={{ color: 'grey.600' }} fontSize="small" />
+                                            </InputAdornment>
+                                        ),
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton className="hidden-button" size='small' onClick={() => remove(index)}>
+                                                    <ClearIcon fontSize="small" />
+                                                </IconButton>
+                                            </InputAdornment>
+                                        )
+                                    }}
+                                    inputProps={{
+                                        onKeyPress: event => {
+                                            const { key } = event;
+                                            if (key === "Enter") {
+                                                event.preventDefault();
+                                                event.currentTarget.blur();
+                                            }
+                                        }
+                                    }}
+                                    sx={{
+                                        width: 150,
+                                        "& .hidden-button": {
+                                            display: "none"
+                                        },
+                                        "&:hover .hidden-button": {
+                                            display: "flex"
+                                        }
+                                    }}
+                                />
+                            )) : null}
+                        </Box>
+                        {(!!error) && <Typography sx={{ fontSize: '12px', color: 'rgb(211, 47, 47)' }}>{error.message}</Typography>}
+
+                        <DesktopDatePicker
+                            value={getValues('dueDate')}
+                            onChange={(date) => {
+                                handleOnChange(date!);
+                                setDatePickerOpen(!datePickerOpen);
+                            }}
+                            open={datePickerOpen}
+                            clearable={true}
+                            renderInput={({ inputRef }) => (
+                                <Box 
+                                    ref={inputRef} 
+                                    sx={{ border: 1, borderColor: 'grey.400', borderRadius: 1, mr: 1, height: 'fit-content', maxWidth: '310px', mt: 1 }} >
+                                    <ButtonBase 
+                                        onClick={() => setDatePickerOpen(!datePickerOpen)} 
+                                        sx={{ pl: 1, py: '0.45rem', width: '100%', justifyContent: 'left' }}
+                                    >
+                                        <CalendarTodayTwoToneIcon />
+                                        
+                                        {(getValues('dueDate')) ? 
+                                            (<Typography sx={{ px: 1 }}>
+                                                {DateTime.fromJSDate(new Date(getValues('dueDate'))).toLocaleString(DateTime.DATE_HUGE)}
+                                            </Typography>) : 
+                                            (<Typography sx={{ px: 1, color: 'grey.500' }}>
+                                                Due Date
+                                            </Typography>
+                                        )}
+                                    </ButtonBase>
+                                </Box>
+                            )}
+                        />
+                    </Grid>
+
+                    <Grid item sx={{ display: 'flex', gap: '0.2rem', alignItems: 'flex-end', pb: '0.825rem' }}>
+                        <div style={{ height: '1.4375rem' }}>
+                            <Tooltip title="Add a label">
+                                <IconButton onClick={() => append('', { focusName: `label[${fields.length}]` })}>
+                                    <AddIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </div>
+
+                        <div style={{ height: '1.4375rem' }}>
+                            <Tooltip title="Set task priority">
+                                <IconButton onClick={handlePriorityMenuOnClick} sx={{ color: getPriorityFlagColor(getValues('priority')) }}>
+                                    <FlagIcon sx={{ color: getPriorityFlagColor(getValues('priority')) }} />
+                                </IconButton>
+                            </Tooltip>
+                        </div>
+                    </Grid>
+
+                    <Menu 
+                        anchorEl={anchorEl} 
+                        open={open} 
+                        onClose={() => handlePriorityMenuOnClose("")}
+                    >
+                        {priorityOptions.map(option => 
+                            <MenuItem key={option.value} onClick={() => handlePriorityMenuOnClose(option.value)}>
+                                {option.value}
+                            </MenuItem>   
+                        )}
+                    </Menu>    
+                </Grid>
+            </Grid>
+
+            <Box sx={{ display: 'inline-flex', flexDirection: 'row', marginTop: '0.25rem', gap: '0.5rem' }}>
+                <LoadingButton 
+                    loading={isSubmitting} 
+                    type='submit' 
+                    variant='contained'
+                >
+                    Submit
+                </LoadingButton>
+
+                <Button 
+                    onClick={() => cancelEdit()}
+                    variant='contained'
+                    color='inherit'
+                >
+                    Cancel
+                </Button>
+            </Box>
+        </form>
     );
 }

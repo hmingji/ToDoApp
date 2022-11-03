@@ -34,7 +34,6 @@ export const accountSlice = createSlice({
         });
         builder.addCase(fetchUserInfo.fulfilled, (state, action) => {
             state.username = action.payload.preferred_username;
-            console.log("get username", action.payload.preferred_username);
             state.status = 'idle';
         });
         builder.addCase(fetchUserInfo.rejected, (state, action) => {

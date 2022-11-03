@@ -2,7 +2,7 @@ import { Typography, Button, Grid, AppBar } from "@mui/material";
 import { authService } from "../../services/AuthService";
 import ThemeSwitch from "../../components/ThemeSwitch";
 import { useAppSelector } from "../../store/configureStore";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 interface Props {
     darkMode: boolean;
@@ -19,13 +19,15 @@ export default function PublicHeader({ darkMode, handleThemeChange } : Props) {
             sx={{ top: 0, left: 0, mb: 4, zIndex: (theme) => (theme.zIndex.drawer + 1), px: '1rem', py: '0.5rem' }}
         >
             <Grid container display="flex" alignItems="center" justifyContent="space-between">
-                <Typography
-                    variant='h6'
-                    sx={{ textDecoration: 'none', color: 'white' }}
-                >
-                    To Do App
-                </Typography>
-
+                <Link to='/' style={{ textDecoration: 'none' }}>
+                    <Typography
+                        variant='h6'
+                        sx={{ textDecoration: 'none', color: 'white' }}
+                    >
+                        To Do App
+                    </Typography>
+                </Link>
+                
                 <Grid item display="flex" gap="1rem">
                     <ThemeSwitch darkMode={darkMode} handleThemeChange={handleThemeChange} />
                     <Button 

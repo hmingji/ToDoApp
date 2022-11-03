@@ -50,7 +50,6 @@ namespace ToDoTask.API.Controllers
         }
 
         [HttpGet("quantity/{userName}", Name = "GetQuantity")]
-        //[ProducesResponseType(typeof(TaskItemQuantity), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<TaskItemQuantity>> GetQuantity(string userName)
         {
             var quantity = await _repository.GetTaskItemQuantity(userName);

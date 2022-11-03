@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useHistory, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { fetchUserInfo } from "../../features/Account/accountSlice";
 import { fetchTaskItemsAsync, fetchTaskItemsQuantityAsync } from "../../features/ToDoList/taskItemSlice";
 import { authService } from "../services/AuthService";
@@ -22,8 +22,9 @@ export default function AppLoader({ children }: Props) {
         try {
             const user = await authService.getUser();
             if (!user && location.pathname === '/todo') return authService.signinRedirect();
+            if (!user) return;
+            setLoading(true);
             await dispatch(fetchUserInfo());
-            console.log("finished fetching userinfo");
             await dispatch(fetchTaskItemsAsync());
             await dispatch(fetchTaskItemsQuantityAsync());
         } catch (error) {
@@ -33,7 +34,7 @@ export default function AppLoader({ children }: Props) {
 
     useEffect(() => {
         initApp().then(() => setLoading(false));
-    }, [initApp]);
+    }, [initApp, location]);
 
     if (loading) return createPortal(<LoadingComponent message="Initialising app..." />, modalRoot);
 

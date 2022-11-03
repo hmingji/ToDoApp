@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useHistory } from "react-router-dom";
 import { authService } from "../services/AuthService";
@@ -12,7 +12,7 @@ export default function SignInRedirectCallback() {
     useEffect(() => {
         authService.signinRedirectCallback().then(() => 
             history.push("/todo"));
-    }, [])
+    })
 
     return createPortal(<LoadingComponent message="Authenticating ..." />, modalRoot);
 }

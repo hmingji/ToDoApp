@@ -67,7 +67,7 @@ namespace ToDoTask.API.Repositories
         {
             using var connection = new NpgsqlConnection
                 (getDbConnStr());
-            Console.WriteLine(taskItem.Id);
+                
             var affected = await connection.ExecuteAsync("UPDATE TaskItem SET TaskName=@TaskName, Description=@Description, DueDate=@DueDate, Assignee=@Assignee, Status=@Status, Label=@Label, Priority=@Priority WHERE Id=@Id",
                 new { TaskName = taskItem.TaskName, Description = taskItem.Description, DueDate = taskItem.DueDate, Assignee = taskItem.Assignee, Status = taskItem.Status, Label = taskItem.Label, Priority = taskItem.Priority, Id = taskItem.Id});
 
@@ -95,8 +95,6 @@ namespace ToDoTask.API.Repositories
             using var connection = new NpgsqlConnection
                 (getDbConnStr());
 
-            Console.WriteLine(taskItem.DueDate);
-
             var affected = await connection.ExecuteAsync
                 ("INSERT INTO TaskItem (TaskName, Description, DueDate, Assignee, Status, Label, Priority) VALUES (@TaskName, @Description, @DueDate, @Assignee, @Status, @Label, @Priority)",
                 new { TaskName = taskItem.TaskName, Description = taskItem.Description, DueDate = taskItem.DueDate, Assignee = taskItem.Assignee, Status = taskItem.Status, Label = taskItem.Label, Priority = taskItem.Priority });
@@ -122,13 +120,9 @@ namespace ToDoTask.API.Repositories
             using var connection = new NpgsqlConnection
                 (getDbConnStr());
             
-
             IEnumerable<int> completedQuantity = await connection.QueryAsync<int>("SELECT COUNT(Id) FROM TaskItem WHERE Assignee = @UserName AND Status = @Complete", new { UserName = userName, Complete = "Completed" });
             IEnumerable<int> incompletedQuantity = await connection.QueryAsync<int>("SELECT COUNT(Id) FROM TaskItem WHERE Assignee = @UserName AND Status = @Incomplete", new { UserName = userName, Incomplete = "Incomplete" });
  
-            Console.WriteLine(completedQuantity.FirstOrDefault());
-            Console.WriteLine(incompletedQuantity.FirstOrDefault());
-            
             return new TaskItemQuantity{
                 CompleteTaskQuantity = completedQuantity.FirstOrDefault(), 
                 IncompleteTaskQuantity = incompletedQuantity.FirstOrDefault()
