@@ -14,9 +14,6 @@ services:
       - identityserver
     ports:
       - "8000:80" 
-    volumes:
-      - ./Services/ToDoTask/ToDoTask.API:/root/ToDoTask.API:cached
-      - ./Services/ToDoTask/ToDoTask.API/certs:/https/
 
   todotaskdb:
     container_name: todotaskdb
@@ -78,12 +75,6 @@ services:
       - identityserverdb
     ports:
       - "8001:443"
-    volumes:
-      - ./Services/Identity/IdentityServer:/root/IdentityServer:cached
-      - ./Services/Identity/IdentityServer/certs:/https/
-      - type: bind # Using a bind volume as only this single file from `certs` directory should end up in the container.
-        source: ./certs/aspnetapp-root-cert.cer
-        target: /https-root/aspnetapp-root-cert.cer
     
   todotask.client:
     container_name: todotaskclient

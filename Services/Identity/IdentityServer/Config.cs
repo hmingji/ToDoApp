@@ -71,8 +71,8 @@ namespace IdentityServer
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.OfflineAccess,
                     },
-                    AccessTokenLifetime = 3000,
-                    IdentityTokenLifetime = 2000,
+                    AccessTokenLifetime = 8000,
+                    IdentityTokenLifetime = 7200,
                     UpdateAccessTokenClaimsOnRefresh = true,
                     AllowAccessTokensViaBrowser = true,
                 }
