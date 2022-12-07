@@ -49,7 +49,7 @@ namespace ToDoTask.API.Extensions
 
                         connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};SSL Mode=Require;Trust Server Certificate=true";
                     }
-
+                    logger.LogInformation(connStr);
                     using var connection = new NpgsqlConnection
                         (connStr);
                     
