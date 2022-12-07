@@ -45,7 +45,7 @@ namespace ToDoTask.API.Extensions
                         var pgDb = pgHostDb.Split("/")[1];
                         var pgUser = pgUserPass.Split(":")[0];
                         var pgPass = pgUserPass.Split(":")[1];
-                        var pgPort = '5432';
+                        var pgPort = 5432;
 
                         connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};SSL Mode=Require;Trust Server Certificate=true";
                     }
