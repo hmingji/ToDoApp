@@ -9,7 +9,6 @@ interface Props {
 }
 
 export default function Intro({ ...props }: Props) {
-  console.log(process.env.REACT_APP_AUTH_URL);
   return (
     <>
       <PublicHeader {...props} />
