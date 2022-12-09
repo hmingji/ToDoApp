@@ -129,6 +129,22 @@ namespace IdentityServer
                 app.UseDeveloperExceptionPage();
             }
 
+            string publicUrl;
+
+            if (env.IsDevelopment()) {
+                publicUrl = Configuration.GetValue<string>("PublicUrl");;
+            } else {
+                publicUrl = Environment.GetEnvironmentVariable("PublicUrl");
+            }
+
+            app.Use(async (ctx, next) =>
+            {
+                ctx.Request.Scheme = "https";
+                ctx.Request.Host = new HostString(publicUrl);
+
+                await next();
+            });
+
             app.UseStaticFiles();
 
             app.UseCors(opt =>
