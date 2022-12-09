@@ -17,6 +17,7 @@ const displayMode = [
   { mode: 'completed', taskStateFilter: 'Completed' },
   { mode: 'filter', taskStateFilter: 'Incomplete' },
 ];
+
 export default function ToDo({ drawerOpen, darkMode }: Props) {
   const { taskItems } = useTaskItems();
   const { taskListDisplayMode } = useAppSelector((state) => state.taskItem);
