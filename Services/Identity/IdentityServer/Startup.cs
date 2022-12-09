@@ -198,6 +198,12 @@ namespace IdentityServer
                         configDbContext.Clients.Add(client.ToEntity());
                     }
                     configDbContext.SaveChanges();
+                } else {
+                    foreach (var client in Config.Clients(configuration))
+                    {
+                        configDbContext.Clients.Add(client.ToEntity());
+                    }
+                    configDbContext.SaveChanges();
                 } // clean the table regardless
 
                 if (!configDbContext.IdentityResources.Any())
