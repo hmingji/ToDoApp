@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { useRef, useState } from 'react';
 import { DateTime } from 'luxon';
-import { DesktopDatePicker } from '@mui/lab';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { CSSTransition } from 'react-transition-group';
 import './FilterDropdownMenu.module.css';
@@ -123,7 +123,11 @@ export default function FilterDropdownMenu({ ifMenuOpen, darkMode }: Props) {
             setDatepickerOpen(!datepickerOpen);
           }}
           open={datepickerOpen}
-          clearable={true}
+          componentsProps={{
+            actionBar: {
+              actions: ['clear'],
+            },
+          }}
           renderInput={({ inputRef, inputProps, InputProps }) => (
             <Grid
               container
