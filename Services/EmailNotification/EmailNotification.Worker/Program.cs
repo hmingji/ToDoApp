@@ -1,10 +1,17 @@
-using EmailNotification.Worker;
+namespace EmailNotification.Worker
+{
+    public class Program {
+        public static void Main(string[] args)
+        {
+            IHost host = Host.CreateDefaultBuilder(args)
+                .ConfigureServices(services =>
+                {
+                    services.AddHostedService<Worker>();
+                })
+                .Build();
 
-IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices(services =>
-    {
-        services.AddHostedService<Worker>();
-    })
-    .Build();
+            host.Run();
+        }
+    }
+}
 
-host.Run();
