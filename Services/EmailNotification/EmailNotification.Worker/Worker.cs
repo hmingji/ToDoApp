@@ -35,10 +35,10 @@ public class Worker : BackgroundService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("Sending email failed");
+                    _logger.LogError("Sending email failed", ex);
                 }
 
-                _logger.LogInformation("Email sent.");
+                //_logger.LogInformation("Email sent.");
             }
             count++;
         }
