@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using EmailNotification.Worker.Models;
 using Mailjet.Client;
+using Mailjet.Client.Resources;
 using Mailjet.Client.TransactionalEmails;
 using Microsoft.Extensions.Options;
 
@@ -26,6 +27,11 @@ namespace EmailNotification.Worker.Mail
                 _emailSettings.ApiKey,
                 _emailSettings.ApiSecret
             );
+
+            MailjetRequest request = new MailjetRequest
+            {
+                Resource = Send.Resource
+            };
 
             var mjEmail = new TransactionalEmailBuilder()
                 .WithFrom(new SendContact(_emailSettings.FromAddress, _emailSettings.FromName))
