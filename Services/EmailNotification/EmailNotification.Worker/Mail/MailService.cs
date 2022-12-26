@@ -13,12 +13,12 @@ namespace EmailNotification.Worker.Mail
     public class MailService : IMailService
     {
         public EmailSettings _emailSettings { get; }
-        //public ILogger<MailService> _logger { get; }
+        public ILogger<MailService> _logger { get; }
 
-        public MailService(IOptions<EmailSettings> mailSettings)
+        public MailService(IOptions<EmailSettings> mailSettings, ILogger<MailService> logger)
         {
             _emailSettings = mailSettings.Value;
-            //_logger = logger;
+            _logger = logger;
         }
 
         public async Task<bool> SendEmail(Email email) 
@@ -41,7 +41,7 @@ namespace EmailNotification.Worker.Mail
                 .Build();
             
             var response = await client.SendTransactionalEmailAsync(mjEmail);
-
+            _logger.LogInformation(String.Format("response: {0}", response));
             //_logger.LogInformation("Email sent.");
 
             if (response.Messages.Length == 1) return true;

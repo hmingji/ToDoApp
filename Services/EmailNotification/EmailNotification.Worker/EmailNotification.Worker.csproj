@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-EmailNotification.Worker-d9c3b943-f132-4be3-8db3-c397c1b94ee8</UserSecretsId>
   </PropertyGroup>

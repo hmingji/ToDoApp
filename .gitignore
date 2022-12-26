@@ -28,3 +28,6 @@ certs
 obj
 
 .vs/
+
+appsettings.Development.json
+
