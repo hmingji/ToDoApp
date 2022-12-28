@@ -127,5 +127,15 @@ namespace ToDoTask.API.Repositories
                 IncompleteTaskQuantity = incompletedQuantity.FirstOrDefault()
             };
         }
+
+        public async Task<List<TaskItem>> GetTaskItemsByDate(DateTime dueDate)
+        {
+            using var connection = new NpgsqlConnection
+                (getDbConnStr());
+
+            List<TaskItem> taskItems = new List<TaskItem>(await connection.QueryAsync<TaskItem>("SELECT * FROM TaskItem WHERE DueDate = @DueDate", new { DueDate = dueDate }));
+
+            return taskItems;
+        }
     }
 }

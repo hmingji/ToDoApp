@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +36,8 @@ namespace ToDoTask.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            Boolean isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" ? true : false;
+
             services.AddScoped<ITaskItemRepositories, TaskItemRepositories>();
 
             services.AddControllers();
@@ -68,6 +71,15 @@ namespace ToDoTask.API
             {
                 options.AddPolicy("ClientIdPolicy", policy => policy.RequireClaim("client_id", "todo_mvc_client"));
             });
+
+            services.AddMassTransit(config => {
+                config.UsingRabbitMq((ctx, cfg) => {
+                    cfg.Host(isDevelopment ? Configuration["EventBusSettings:HostAddress"]: Environment.GetEnvironmentVariable("RABBITMQ_HOSTADDRESS"));
+                    cfg.ConfigureEndpoints(ctx);
+                });
+            });
+
+            //services.AddMassTransitHostedService();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

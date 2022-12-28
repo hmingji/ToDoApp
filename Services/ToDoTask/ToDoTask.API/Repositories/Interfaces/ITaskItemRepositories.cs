@@ -13,5 +13,6 @@ namespace ToDoTask.API.Repositories.Interfaces
         Task<bool> CreateTaskItem(TaskItem task);
         Task<List<string>> GetFilters(string userName);
         Task<TaskItemQuantity> GetTaskItemQuantity(string userName);
+        Task<List<TaskItem>> GetTaskItemsByDate(DateTime dueDate);
     }
 }
