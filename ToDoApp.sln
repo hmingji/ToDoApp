@@ -25,6 +25,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EmailNotification", "EmailN
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailNotification.Worker", "Services\EmailNotification\EmailNotification.Worker\EmailNotification.Worker.csproj", "{90C6001C-17A1-42BE-8E47-23810667C6BE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildingBlocks", "BuildingBlocks", "{525DECA7-A8E6-47E3-9782-47E72BAD4B34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBus.Messages", "BuildingBlocks\EventBus.Messages\EventBus.Messages.csproj", "{D5D6E82E-3CD2-4985-947A-94A6127EBE38}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +51,10 @@ Global
 		{90C6001C-17A1-42BE-8E47-23810667C6BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90C6001C-17A1-42BE-8E47-23810667C6BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{90C6001C-17A1-42BE-8E47-23810667C6BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5D6E82E-3CD2-4985-947A-94A6127EBE38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5D6E82E-3CD2-4985-947A-94A6127EBE38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5D6E82E-3CD2-4985-947A-94A6127EBE38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5D6E82E-3CD2-4985-947A-94A6127EBE38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,6 +66,7 @@ Global
 		{5D15D2EB-1C1A-4BA1-8EC7-E179ABAF8D49} = {2C3221C3-424E-49CC-940E-D41F2DE47132}
 		{D482A06F-BEFB-47DD-9504-3D8F9A07AB6C} = {102F07D6-48D2-4260-ACF8-567C600CD15D}
 		{90C6001C-17A1-42BE-8E47-23810667C6BE} = {D482A06F-BEFB-47DD-9504-3D8F9A07AB6C}
+		{D5D6E82E-3CD2-4985-947A-94A6127EBE38} = {525DECA7-A8E6-47E3-9782-47E72BAD4B34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {33E9385D-0856-4266-8AD7-23BEA77B275B}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Coravel.Invocable;
+using EventBus.Messages.Events;
 using MassTransit;
 using ToDoTask.API.Entities;
 using ToDoTask.API.Repositories.Interfaces;
@@ -24,7 +25,14 @@ namespace ToDoTask.API.ScheduledJobs
         {
             DateTime taskDueDate = DateTime.Now.AddDays(2);
             List<TaskItem> tasksToRemind = await _taskItemRepositories.GetTaskItemsByDate(taskDueDate);
-            
+            if (tasksToRemind.Any()) return;
+            foreach (TaskItem task in tasksToRemind)
+            {
+                TaskReminderEvent eventMessage = new TaskReminderEvent();
+                eventMessage.To = task.Assignee;
+                eventMessage.Subject = task.TaskName;
+                eventMessage.Body = $"";
+            }
         }
     }
 }
