@@ -1,3 +1,4 @@
+using Coravel;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using ToDoTask.API.Repositories;
 using ToDoTask.API.Repositories.Interfaces;
+using ToDoTask.API.ScheduledJobs;
 
 namespace ToDoTask.API
 {
@@ -39,7 +41,9 @@ namespace ToDoTask.API
             Boolean isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" ? true : false;
 
             services.AddScoped<ITaskItemRepositories, TaskItemRepositories>();
-
+            services.AddTransient<SendReminderEvents>();
+            services.AddAutoMapper(typeof(Startup));
+            services.AddScheduler();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -75,7 +79,7 @@ namespace ToDoTask.API
             services.AddMassTransit(config => {
                 config.UsingRabbitMq((ctx, cfg) => {
                     cfg.Host(isDevelopment ? Configuration["EventBusSettings:HostAddress"]: Environment.GetEnvironmentVariable("RABBITMQ_HOSTADDRESS"));
-                    cfg.ConfigureEndpoints(ctx);
+                    //cfg.ConfigureEndpoints(ctx);
                 });
             });
 
@@ -91,6 +95,14 @@ namespace ToDoTask.API
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ToDoTask.API v1"));
             }
+            
+            var provider = app.ApplicationServices;
+            provider.UseScheduler(schedular => 
+            {
+                schedular.Schedule<SendReminderEvents>()
+                    .DailyAt(8 + 8, 0)
+                    .RunOnceAtStart(); //for development purpose
+            });
 
             app.UseRouting();
 

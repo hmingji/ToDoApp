@@ -132,8 +132,8 @@ namespace ToDoTask.API.Repositories
         {
             using var connection = new NpgsqlConnection
                 (getDbConnStr());
-
-            List<TaskItem> taskItems = new List<TaskItem>(await connection.QueryAsync<TaskItem>("SELECT * FROM TaskItem WHERE DueDate = @DueDate", new { DueDate = dueDate }));
+            Console.WriteLine($"getting task item, dueDate: {dueDate.Date.ToString()}");
+            List<TaskItem> taskItems = new List<TaskItem>(await connection.QueryAsync<TaskItem>("SELECT * FROM TaskItem WHERE DueDate = @DueDate", new { DueDate = dueDate.Date }));
 
             return taskItems;
         }

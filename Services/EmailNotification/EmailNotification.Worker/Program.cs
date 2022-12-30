@@ -3,6 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using EmailNotification.Worker.Mail;
 using EmailNotification.Worker.Models;
+using MassTransit;
+using EmailNotification.Worker.Consumer;
+using EventBus.Messages.Common;
 
 namespace EmailNotification.Worker
 {
@@ -18,6 +21,7 @@ namespace EmailNotification.Worker
                 //.UseSerilog(SeriLogger.Configure)
                 .ConfigureServices((hostContext, services) =>
                 {
+                    Boolean isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" ? true : false;
                     var configurationRoot = hostContext.Configuration;
                     services.Configure<EmailSettings>(configurationRoot.GetSection("EmailSettings"));
 
@@ -31,6 +35,15 @@ namespace EmailNotification.Worker
                     };
 
                     services.AddSingleton<IMailService, MailService>();
+                    services.AddMassTransit(config => {
+                        config.AddConsumer<TaskReminderConsumer>();
+                        config.UsingRabbitMq((ctx, cfg) => {
+                            cfg.Host(isDevelopment ? configurationRoot["EventBusSettings:HostAddress"]: Environment.GetEnvironmentVariable("RABBITMQ_HOSTADDRESS"));
+                            cfg.ReceiveEndpoint(EventBusConstants.TaskReminderQueue, c => {
+                                c.ConfigureConsumer<TaskReminderConsumer>(ctx);
+                            });
+                        });
+                    });
                     services.AddHostedService<Worker>();
                 })
                 .Build();
