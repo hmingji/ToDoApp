@@ -21,7 +21,7 @@ namespace EmailNotification.Worker
                 //.UseSerilog(SeriLogger.Configure)
                 .ConfigureServices((hostContext, services) =>
                 {
-                    Boolean isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" ? true : false;
+                    Boolean isDevelopment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") == "Development" ? true : false;
                     var configurationRoot = hostContext.Configuration;
                     services.Configure<EmailSettings>(configurationRoot.GetSection("EmailSettings"));
 
