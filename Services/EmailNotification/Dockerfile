@@ -8,7 +8,7 @@ USER appuser
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["Services/EmailNotification.Worker/EmailNotification.Worker.csproj", "Services/EmailNotification/EmailNotification.Worker/"]
+COPY ["Services/EmailNotification/EmailNotification.Worker/EmailNotification.Worker.csproj", "Services/EmailNotification/EmailNotification.Worker/"]
 COPY ["BuildingBlocks/EventBus.Messages/EventBus.Messages.csproj", "BuildingBlocks/EventBus.Messages/"]
 RUN dotnet restore "Services/EmailNotification/EmailNotification.Worker/EmailNotification.Worker.csproj"
 COPY . .

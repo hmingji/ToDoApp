@@ -6,7 +6,7 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
-COPY ["Services/ToDoTask.API/ToDoTask.API.csproj", "Services/ToDoTask/ToDoTask.API/"]
+COPY ["Services/ToDoTask/ToDoTask.API/ToDoTask.API.csproj", "Services/ToDoTask/ToDoTask.API/"]
 COPY ["BuildingBlocks/EventBus.Messages/EventBus.Messages.csproj", "BuildingBlocks/EventBus.Messages/"]
 RUN dotnet restore "Services/ToDoTask/ToDoTask.API/ToDoTask.API.csproj"
 COPY . .
