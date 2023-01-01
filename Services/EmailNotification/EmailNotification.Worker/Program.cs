@@ -44,7 +44,7 @@ namespace EmailNotification.Worker
                             });
                         });
                     });
-                    services.AddHostedService<Worker>();
+                    //services.AddHostedService<Worker>();
                 })
                 .Build();
             
