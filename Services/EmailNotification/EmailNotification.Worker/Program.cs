@@ -31,6 +31,7 @@ namespace EmailNotification.Worker
                             option.ApiSecret=Environment.GetEnvironmentVariable("MJ_APIKEY_PRIVATE")!;
                             option.FromAddress=Environment.GetEnvironmentVariable("FROM_ADDRESS")!;
                             option.FromName=Environment.GetEnvironmentVariable("FROM_NAME")!;
+                            option.EmailTemplateID=long.Parse(Environment.GetEnvironmentVariable("EMAIL_TEMPLATE_ID")!);
                         });
                     };
 

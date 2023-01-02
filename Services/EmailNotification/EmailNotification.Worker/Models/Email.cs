@@ -9,6 +9,6 @@ namespace EmailNotification.Worker.Models
     {
         public string To { get; set; }
         public string Subject { get; set; }
-        public string Body { get; set; }
+        public Dictionary<string, object> BodyVars { get; set; }
     }
 }

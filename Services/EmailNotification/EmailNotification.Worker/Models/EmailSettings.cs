@@ -11,5 +11,6 @@ namespace EmailNotification.Worker.Models
         public string ApiSecret { get; set; }
         public string FromAddress { get; set; }
         public string FromName { get; set; }
+        public long EmailTemplateID { get; set; }
     }
 }

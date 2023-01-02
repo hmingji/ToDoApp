@@ -9,7 +9,7 @@ namespace EventBus.Messages.Events
     {
         public string TaskName { get; set; }
         public string Description { get; set; }
-        public DateTime? DueDate { get; set; }
+        public DateTime DueDate { get; set; }
         public string Assignee { get; set; }
         public string Status { get; set; }
         public string[] Label { get; set; }

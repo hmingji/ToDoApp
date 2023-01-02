@@ -36,7 +36,8 @@ namespace EmailNotification.Worker.Mail
             var mjEmail = new TransactionalEmailBuilder()
                 .WithFrom(new SendContact(_emailSettings.FromAddress, _emailSettings.FromName))
                 .WithSubject(email.Subject)
-                .WithHtmlPart(email.Body)
+                .WithTemplateId(_emailSettings.EmailTemplateID)
+                .WithVariables(email.BodyVars)
                 .WithTo(new SendContact(email.To))
                 .Build();
             
