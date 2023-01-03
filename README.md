@@ -65,7 +65,7 @@ heroku container:push web -a <application name>
 heroku container:release web -a <application name>
 ```
 
-## Demo
+## Demo (email feature not on live)
 
 https://todoapp-jtc5.onrender.com/
 
