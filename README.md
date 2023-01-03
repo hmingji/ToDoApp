@@ -10,6 +10,7 @@ This application is built with intention to self-learn web development. Tech sta
 - filter task by task label, due date, priority
 - light/dark mode toggle
 - user login
+- email notification
 
 ## Deployment
 
@@ -70,4 +71,4 @@ https://todoapp-jtc5.onrender.com/
 
 ## Future Improvement
 
-- add email notification feature to remind user about the task due date.
+- add push notification feature to remind user about the task due date.
