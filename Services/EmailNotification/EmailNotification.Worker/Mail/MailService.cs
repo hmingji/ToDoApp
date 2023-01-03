@@ -37,6 +37,7 @@ namespace EmailNotification.Worker.Mail
                 .WithFrom(new SendContact(_emailSettings.FromAddress, _emailSettings.FromName))
                 .WithSubject(email.Subject)
                 .WithTemplateId(_emailSettings.EmailTemplateID)
+                .WithTemplateLanguage(true)
                 .WithVariables(email.BodyVars)
                 .WithTo(new SendContact(email.To))
                 .Build();

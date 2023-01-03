@@ -67,8 +67,6 @@ namespace ToDoTask.API.Repositories
             using var connection = new NpgsqlConnection
                 (getDbConnStr());
 
-            Console.WriteLine($"updating task due date into: {taskItem.DueDate}");
-
             var affected = await connection.ExecuteAsync("UPDATE TaskItem SET TaskName=@TaskName, Description=@Description, DueDate=@DueDate, Assignee=@Assignee, Status=@Status, Label=@Label, Priority=@Priority WHERE Id=@Id",
                 new { TaskName = taskItem.TaskName, Description = taskItem.Description, DueDate = taskItem.DueDate, Assignee = taskItem.Assignee, Status = taskItem.Status, Label = taskItem.Label, Priority = taskItem.Priority, Id = taskItem.Id});
 
