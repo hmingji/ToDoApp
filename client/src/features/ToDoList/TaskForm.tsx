@@ -82,8 +82,8 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
     setAnchorEl(null);
   };
 
-  const handleOnChange = (value: Date) => {
-    setValue('dueDate', value, { shouldValidate: true });
+  const handleOnChange = (value: DateTime) => {
+    setValue('dueDate', value.plus({ hours: 8 }), { shouldValidate: true });
   };
 
   async function handleSubmitData(data: FieldValues) {
