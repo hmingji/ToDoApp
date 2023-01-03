@@ -83,7 +83,13 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
   };
 
   const handleOnChange = (value: DateTime) => {
-    setValue('dueDate', value.plus({ hours: 8 }), { shouldValidate: true });
+    setValue(
+      'dueDate',
+      value.offset > 0
+        ? value.plus({ minutes: value.offset })
+        : value.minus({ minutes: value.offset }),
+      { shouldValidate: true }
+    );
   };
 
   async function handleSubmitData(data: FieldValues) {
@@ -94,7 +100,6 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
       } else {
         response = await agent.Task.createTask(data);
       }
-      console.log('submitting form, data: ', data);
       dispatch(setTaskItem(response));
       cancelEdit();
       toast.success('Submit successfully.');
@@ -117,7 +122,6 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
 
   function resetForm(taskItem: TaskItem | undefined) {
     if (taskItem) {
-      console.log('reseting form, taskItem: ', taskItem);
       Object.entries(taskItem).forEach(([key, value]) => {
         if (value) {
           register(key, { value: value });
@@ -147,7 +151,6 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
 
   useEffect(() => {
     if (executeRef.current) return;
-    console.log('running reset form');
     resetForm(taskItem);
     if (formElementRef.current) scrollToView(formElementRef.current);
     executeRef.current = true;
