@@ -5,27 +5,25 @@ services:
     container_name: todotask.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - "DatabaseSettings:ConnectionString=Server=todotaskdb;Port=5432;Database=ToDoTaskDb;User Id=admin;Password=admin1234;"
-      - "IdentityServerOrigin=https://identityserver:443"
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp-web-api.pfx
+      - 'DatabaseSettings:ConnectionString=Server=todotaskdb;Port=5432;Database=ToDoTaskDb;User Id=admin;Password=admin1234;'
+      - 'IdentityServerOrigin=https://identityserver:443'
     depends_on:
-      - todotaskdb
+      # - todotaskdb
       - identityserver
     ports:
-      - "8000:80" 
+      - '8000:80'
 
-  todotaskdb:
-    container_name: todotaskdb
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin1234
-      - POSTGRES_DB=ToDoTaskDb
-    restart: always
-    ports:
-      - "5432:5432"
-    volumes:
-      - todo_data:/var/lib/postgresql/todotaskdb/data/
+  # todotaskdb:
+  #   container_name: todotaskdb
+  #   environment:
+  #     - POSTGRES_USER=admin
+  #     - POSTGRES_PASSWORD=admin1234
+  #     - POSTGRES_DB=ToDoTaskDb
+  #   restart: always
+  #   ports:
+  #     - '5432:5432'
+  #   volumes:
+  #     - todo_data:/var/lib/postgresql/todotaskdb/data/
 
   identityserverdb:
     container_name: identityserverdb
@@ -35,51 +33,49 @@ services:
       - POSTGRES_DB=IdentityServerDb
     restart: always
     expose:
-      - "5430"
+      - '5430'
     ports:
-      - "5430:5430"
+      - '5430:5430'
     volumes:
       - identity_data:/var/lib/postgresql/identityserverdb/data/
     command: -p 5430
-    
-  pgadmin:
-    container_name: pgadmin
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@hotmail.com
-      - PGADMIN_DEFAULT_PASSWORD=admin1234
-    restart: always
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin_data:/root/.pgadmin
-      
-  portainer:
-    container_name: portainer
-    restart: always
-    ports: 
-      - "8080:8000"
-      - "9000:9000"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
+
+  # pgadmin:
+  #   container_name: pgadmin
+  #   environment:
+  #     - PGADMIN_DEFAULT_EMAIL=admin@hotmail.com
+  #     - PGADMIN_DEFAULT_PASSWORD=admin1234
+  #   restart: always
+  #   ports:
+  #     - '5050:80'
+  #   volumes:
+  #     - pgadmin_data:/root/.pgadmin
+
+  # portainer:
+  #   container_name: portainer
+  #   restart: always
+  #   ports:
+  #     - '8080:8000'
+  #     - '9000:9000'
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - portainer_data:/data
 
   identityserver:
     container_name: identityserver
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
-      - "ConnectionStrings:IdentityServerConnection=Server=identityserverdb;Port=5430;Database=IdentityServerDb;User Id=admin;Password=admin1234;"
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp-identity-server.pfx
+      - 'ConnectionStrings:IdentityServerConnection=Server=identityserverdb;Port=5430;Database=IdentityServerDb;User Id=admin;Password=admin1234;'
     depends_on:
       - identityserverdb
     ports:
-      - "8001:443"
-    
-  todotask.client:
-    container_name: todotaskclient
-    ports:
-      - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
+      - '8001:443'
+
+  # todotask.client:
+  #   container_name: todotaskclient
+  #   ports:
+  #     - '3000:3000'
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules

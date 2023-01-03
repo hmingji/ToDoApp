@@ -94,6 +94,7 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
       } else {
         response = await agent.Task.createTask(data);
       }
+      console.log('submitting form, data: ', data);
       dispatch(setTaskItem(response));
       cancelEdit();
       toast.success('Submit successfully.');
@@ -116,6 +117,7 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
 
   function resetForm(taskItem: TaskItem | undefined) {
     if (taskItem) {
+      console.log('reseting form, taskItem: ', taskItem);
       Object.entries(taskItem).forEach(([key, value]) => {
         if (value) {
           register(key, { value: value });
@@ -145,6 +147,7 @@ export default function TaskForm({ taskItem, cancelEdit }: Props) {
 
   useEffect(() => {
     if (executeRef.current) return;
+    console.log('running reset form');
     resetForm(taskItem);
     if (formElementRef.current) scrollToView(formElementRef.current);
     executeRef.current = true;

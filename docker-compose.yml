@@ -7,32 +7,32 @@ services:
       context: .
       dockerfile: Services/ToDoTask/Dockerfile
 
-  todotaskdb:
-    image: postgres
+  # todotaskdb:
+  #   image: postgres
 
   identityserverdb:
     image: postgres
 
-  pgadmin:
-    image: dpage/pgadmin4
+  # pgadmin:
+  #   image: dpage/pgadmin4
 
-  portainer:
-    image: portainer/portainer-ce
+  # portainer:
+  #   image: portainer/portainer-ce
 
   identityserver:
     image: ${DOCKER_REGISTRY-}identityserver
     build:
       context: .
       dockerfile: Services/Identity/Dockerfile
-  
-  todotask.client:
-    image: ${DOCKER_REGISTRY-}todotaskclient
-    build:
-      context: .
-      dockerfile: client/Dockerfile.development
+
+  # todotask.client:
+  #   image: ${DOCKER_REGISTRY-}todotaskclient
+  #   build:
+  #     context: .
+  #     dockerfile: client/Dockerfile.development
 
 volumes:
-  todo_data:
+  # todo_data:
   identity_data:
-  pgadmin_data:
-  portainer_data:
+  # pgadmin_data:
+  # portainer_data:
