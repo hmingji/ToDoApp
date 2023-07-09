@@ -8,38 +8,10 @@ services:
       - 'DatabaseSettings:ConnectionString=Server=postgresDb;Port=5432;Database=db;User Id=admin;Password=admin1234;'
       - 'IdentityServerOrigin=http://identityserver:80'
     depends_on:
-      # - todotaskdb
       - identityserver
       - postgresDb
     ports:
       - '8000:80'
-
-  # todotaskdb:
-  #   container_name: todotaskdb
-  #   environment:
-  #     - POSTGRES_USER=admin
-  #     - POSTGRES_PASSWORD=admin1234
-  #     - POSTGRES_DB=ToDoTaskDb
-  #   restart: always
-  #   ports:
-  #     - '5432:5432'
-  #   volumes:
-  #     - todo_data:/var/lib/postgresql/todotaskdb/data/
-
-  # identityserverdb:
-  #   container_name: identityserverdb
-  #   environment:
-  #     - POSTGRES_USER=admin
-  #     - POSTGRES_PASSWORD=admin1234
-  #     - POSTGRES_DB=IdentityServerDb
-  #   restart: always
-  #   expose:
-  #     - '5430'
-  #   ports:
-  #     - '5430:5430'
-  #   volumes:
-  #     - identity_data:/var/lib/postgresql/identityserverdb/data/
-  #   command: -p 5430
 
   postgresDb:
     container_name: postgresDb
@@ -53,27 +25,6 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/db/data/
 
-  # pgadmin:
-  #   container_name: pgadmin
-  #   environment:
-  #     - PGADMIN_DEFAULT_EMAIL=admin@hotmail.com
-  #     - PGADMIN_DEFAULT_PASSWORD=admin1234
-  #   restart: always
-  #   ports:
-  #     - '5050:80'
-  #   volumes:
-  #     - pgadmin_data:/root/.pgadmin
-
-  # portainer:
-  #   container_name: portainer
-  #   restart: always
-  #   ports:
-  #     - '8080:8000'
-  #     - '9000:9000'
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #     - portainer_data:/data
-
   identityserver:
     container_name: identityserver
     environment:
@@ -86,10 +37,10 @@ services:
     ports:
       - '8001:80'
 
-  # todotask.client:
-  #   container_name: todotaskclient
-  #   ports:
-  #     - '3000:3000'
-  #   volumes:
-  #     - .:/app
-  #     - /app/node_modules
+  todotask.client:
+    container_name: todotaskclient
+    ports:
+      - '80:80'
+    volumes:
+      - .:/app
+      - /app/node_modules
