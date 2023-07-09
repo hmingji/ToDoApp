@@ -38,7 +38,10 @@ namespace ToDoTask.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            Boolean isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" ? true : false;
+            Boolean isDevelopment =
+                Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
+                    ? true
+                    : false;
 
             services.AddScoped<ITaskItemRepositories, TaskItemRepositories>();
             services.AddTransient<SendReminderEvents>();
@@ -50,40 +53,54 @@ namespace ToDoTask.API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ToDoTask.API", Version = "v1" });
             });
             services.AddCors();
-
-            //configuration for authentication
-            services.AddAuthentication("Bearer")
-                .AddJwtBearer("Bearer", options =>
-                {
-                    options.RequireHttpsMetadata = false;
-                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            services
+                .AddAuthentication("Bearer")
+                .AddJwtBearer(
+                    "Bearer",
+                    options =>
                     {
-                        options.Authority = Configuration.GetValue<string>("IdentityServerOrigin");
-                    } else
-                    {
-                        options.Authority = Environment.GetEnvironmentVariable("IDENTITY_URL");
+                        options.RequireHttpsMetadata = false;
+                        if (
+                            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                            == "Development"
+                        )
+                        {
+                            options.Authority = Configuration.GetValue<string>(
+                                "IdentityServerOrigin"
+                            );
+                        }
+                        else
+                        {
+                            options.Authority = Environment.GetEnvironmentVariable("IDENTITY_URL");
+                        }
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateAudience = false,
+                            ValidateIssuer = false,
+                            ClockSkew = TimeSpan.Zero,
+                        };
                     }
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateAudience = false,
-                        ValidateIssuer = false,
-                        ClockSkew = TimeSpan.Zero,
-                    };
-                });
-
+                );
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("ClientIdPolicy", policy => policy.RequireClaim("client_id", "todo_mvc_client"));
+                options.AddPolicy(
+                    "ClientIdPolicy",
+                    policy => policy.RequireClaim("client_id", "todo_mvc_client")
+                );
             });
-
-            services.AddMassTransit(config => {
-                config.UsingRabbitMq((ctx, cfg) => {
-                    cfg.Host(isDevelopment ? Configuration["EventBusSettings:HostAddress"]: Environment.GetEnvironmentVariable("RABBITMQ_HOSTADDRESS"));
-                    //cfg.ConfigureEndpoints(ctx);
-                });
+            services.AddMassTransit(config =>
+            {
+                config.UsingRabbitMq(
+                    (ctx, cfg) =>
+                    {
+                        cfg.Host(
+                            isDevelopment
+                                ? Configuration["EventBusSettings:HostAddress"]
+                                : Environment.GetEnvironmentVariable("RABBITMQ_HOSTADDRESS")
+                        );
+                    }
+                );
             });
-
-            //services.AddMassTransitHostedService();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -93,27 +110,22 @@ namespace ToDoTask.API
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ToDoTask.API v1"));
+                app.UseSwaggerUI(
+                    c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ToDoTask.API v1")
+                );
             }
-            
             var provider = app.ApplicationServices;
-            provider.UseScheduler(schedular => 
+            provider.UseScheduler(schedular =>
             {
-                schedular.Schedule<SendReminderEvents>()
-                    .DailyAt(8 + 8, 0)
-                    .RunOnceAtStart(); //for development purpose
+                schedular.Schedule<SendReminderEvents>().DailyAt(8 + 8, 0).RunOnceAtStart(); //for development purpose
             });
-
             app.UseRouting();
-
             app.UseCors(opt =>
             {
                 opt.AllowAnyHeader().AllowAnyMethod().WithOrigins(getClientOrigin());
             });
-
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

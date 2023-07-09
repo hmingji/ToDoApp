@@ -5,11 +5,12 @@ services:
     container_name: todotask.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - 'DatabaseSettings:ConnectionString=Server=todotaskdb;Port=5432;Database=ToDoTaskDb;User Id=admin;Password=admin1234;'
-      - 'IdentityServerOrigin=https://identityserver:443'
+      - 'DatabaseSettings:ConnectionString=Server=postgresDb;Port=5432;Database=db;User Id=admin;Password=admin1234;'
+      - 'IdentityServerOrigin=http://identityserver:80'
     depends_on:
       # - todotaskdb
       - identityserver
+      - postgresDb
     ports:
       - '8000:80'
 
@@ -25,20 +26,32 @@ services:
   #   volumes:
   #     - todo_data:/var/lib/postgresql/todotaskdb/data/
 
-  identityserverdb:
-    container_name: identityserverdb
+  # identityserverdb:
+  #   container_name: identityserverdb
+  #   environment:
+  #     - POSTGRES_USER=admin
+  #     - POSTGRES_PASSWORD=admin1234
+  #     - POSTGRES_DB=IdentityServerDb
+  #   restart: always
+  #   expose:
+  #     - '5430'
+  #   ports:
+  #     - '5430:5430'
+  #   volumes:
+  #     - identity_data:/var/lib/postgresql/identityserverdb/data/
+  #   command: -p 5430
+
+  postgresDb:
+    container_name: postgresDb
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin1234
-      - POSTGRES_DB=IdentityServerDb
+      - POSTGRES_DB=db
     restart: always
-    expose:
-      - '5430'
     ports:
-      - '5430:5430'
+      - '5432:5432'
     volumes:
-      - identity_data:/var/lib/postgresql/identityserverdb/data/
-    command: -p 5430
+      - db_data:/var/lib/postgresql/db/data/
 
   # pgadmin:
   #   container_name: pgadmin
@@ -65,12 +78,13 @@ services:
     container_name: identityserver
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-      - 'ConnectionStrings:IdentityServerConnection=Server=identityserverdb;Port=5430;Database=IdentityServerDb;User Id=admin;Password=admin1234;'
+      # - ASPNETCORE_URLS=https://+:443;http://+:80
+      - 'ConnectionStrings:IdentityServerConnection=Server=postgresDb;Port=5432;Database=db;User Id=admin;Password=admin1234;'
+      - PORT=80
     depends_on:
-      - identityserverdb
+      - postgresDb
     ports:
-      - '8001:443'
+      - '8001:80'
 
   # todotask.client:
   #   container_name: todotaskclient

@@ -6,14 +6,11 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace IdentityServer
 {
     public class Config
     {
-        
-
         public static IEnumerable<Client> Clients(IConfiguration configuration)
         {
             string getClientOrigin()
@@ -34,10 +31,7 @@ namespace IdentityServer
                 {
                     ClientId = "todoClient",
                     AllowedGrantTypes = GrantTypes.ClientCredentials,
-                    ClientSecrets =
-                    {
-                        new Secret("secret".Sha256())
-                    },
+                    ClientSecrets = { new Secret("secret".Sha256()) },
                     AllowedScopes = new List<string>
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
@@ -61,10 +55,7 @@ namespace IdentityServer
                     {
                         $"{getClientOrigin()}/signout-callback-oidc"
                     },
-                    ClientSecrets = new List<Secret>
-                    {
-                        new Secret("secret".Sha256())
-                    },
+                    ClientSecrets = new List<Secret> { new Secret("secret".Sha256()) },
                     AllowedScopes = new List<string>
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
@@ -77,27 +68,23 @@ namespace IdentityServer
                     AllowAccessTokensViaBrowser = true,
                 }
             };
-            
         }
 
         public static IEnumerable<ApiScope> ApiScopes =>
-           new ApiScope[]
-           {
-               new ApiScope("todoAPI", "Todo API")
-           };
+            new ApiScope[] { new ApiScope("todoAPI", "Todo API") };
 
         public static IEnumerable<ApiResource> ApiResources =>
-          new ApiResource[]
-          {
-               //new ApiResource("movieAPI", "Movie API")
-          };
+            new ApiResource[]
+            {
+                //new ApiResource("movieAPI", "Movie API")
+            };
 
         public static IEnumerable<IdentityResource> IdentityResources =>
-          new IdentityResource[]
-          {
-              new IdentityResources.OpenId(),
-              new IdentityResources.Profile()
-          };
+            new IdentityResource[]
+            {
+                new IdentityResources.OpenId(),
+                new IdentityResources.Profile()
+            };
 
         public static List<TestUser> TestUsers =>
             new List<TestUser>

@@ -10,7 +10,10 @@ services:
   # todotaskdb:
   #   image: postgres
 
-  identityserverdb:
+  # identityserverdb:
+  #   image: postgres
+
+  postgresDb:
     image: postgres
 
   # pgadmin:
@@ -33,6 +36,7 @@ services:
 
 volumes:
   # todo_data:
-  identity_data:
+  # identity_data:
   # pgadmin_data:
   # portainer_data:
+  db_data:

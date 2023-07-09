@@ -5,23 +5,18 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using IdentityServer4.EntityFramework.DbContexts;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using IdentityServer4.EntityFramework.Mappers;
-using IdentityServer4;
 using IdentityServer.Data;
 using IdentityServerHost.Quickstart.UI;
 using IdentityServer4.Services;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace IdentityServer
 {
@@ -39,7 +34,8 @@ namespace IdentityServer
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
             {
                 return Configuration.GetValue<string>("ClientOrigin");
-            } else
+            }
+            else
             {
                 return Environment.GetEnvironmentVariable("ClientOrigin");
             }
@@ -73,50 +69,54 @@ namespace IdentityServer
                 var pgPass = pgUserPass.Split(":")[1];
                 var pgPort = 5432;
 
-                connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};SSL Mode=Require;Trust Server Certificate=true";
+                connStr =
+                    $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};SSL Mode=Require;Trust Server Certificate=true";
             }
-
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(connStr));
-
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connStr));
+            services
+                .AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
-
             services.AddCors();
-
-            services.AddMvc(options => {
-                //options.Filters.Add(new RequireHttpsAttribute());
+            services.AddMvc(options =>
+            {
                 options.EnableEndpointRouting = false;
             });
 
             string connectionString = connStr;
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
-            services.AddIdentityServer()
+            services
+                .AddIdentityServer()
                 .AddDeveloperSigningCredential()
                 .AddAspNetIdentity<IdentityUser>()
                 .AddConfigurationStore(options =>
                 {
-                    options.ConfigureDbContext = builder => builder.UseNpgsql(connectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
+                    options.ConfigureDbContext = builder =>
+                        builder.UseNpgsql(
+                            connectionString,
+                            sql => sql.MigrationsAssembly(migrationsAssembly)
+                        );
                 })
                 .AddOperationalStore(options =>
                 {
-                    options.ConfigureDbContext = builder => builder.UseNpgsql(connectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
+                    options.ConfigureDbContext = builder =>
+                        builder.UseNpgsql(
+                            connectionString,
+                            sql => sql.MigrationsAssembly(migrationsAssembly)
+                        );
                 });
-            
-
-            services.AddSingleton<ICorsPolicyService>((container) => {
-                var logger = container.GetRequiredService<ILogger<DefaultCorsPolicyService>>();
-                return new DefaultCorsPolicyService(logger)
+            services.AddSingleton<ICorsPolicyService>(
+                (container) =>
                 {
-                    AllowedOrigins = { getClientOrigin() }
-                };
-            });
-
+                    var logger = container.GetRequiredService<ILogger<DefaultCorsPolicyService>>();
+                    return new DefaultCorsPolicyService(logger)
+                    {
+                        AllowedOrigins = { getClientOrigin() }
+                    };
+                }
+            );
             services.ConfigureNonBreakingSameSiteCookies();
-            //services.AddAuthentication(x=>x.DefaultAuthenticateScheme = IdentityServer4.IdentityServerConstants.DefaultCookieAuthenticationScheme);
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -131,58 +131,69 @@ namespace IdentityServer
 
             string publicUrl;
 
-            if (env.IsDevelopment()) {
-                publicUrl = Configuration.GetValue<string>("PublicUrl");;
-            } else {
+            if (env.IsDevelopment())
+            {
+                publicUrl = Configuration.GetValue<string>("PublicUrl");
+                ;
+            }
+            else
+            {
                 publicUrl = Environment.GetEnvironmentVariable("PublicUrl");
             }
 
-            app.Use(async (ctx, next) =>
-            {
-                ctx.Request.Scheme = "https";
-                ctx.Request.Host = new HostString(publicUrl);
+            app.Use(
+                async (ctx, next) =>
+                {
+                    ctx.Request.Scheme = "https";
+                    ctx.Request.Host = new HostString(publicUrl);
 
-                await next();
-            });
-
+                    await next();
+                }
+            );
             app.UseStaticFiles();
-
             app.UseCors(opt =>
             {
                 opt.AllowAnyHeader().AllowAnyMethod().WithOrigins(getClientOrigin());
             });
-
             AccountOptions.ShowLogoutPrompt = false;
             AccountOptions.AutomaticRedirectAfterSignOut = true;
             app.UseCookiePolicy();
             app.UseIdentityServer();
             app.UseAuthorization();
-
-            
             app.UseAuthentication();
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{id?}"
+                );
             });
         }
 
         private void InitializeDatabase(IApplicationBuilder app, IConfiguration configuration)
         {
-            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            using (
+                var serviceScope = app.ApplicationServices
+                    .GetService<IServiceScopeFactory>()
+                    .CreateScope()
+            )
             {
-                var appDbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var appDbContext =
+                    serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 appDbContext.Database.EnsureCreated();
-                var appDbCreator = (RelationalDatabaseCreator)appDbContext.Database.GetService<IDatabaseCreator>();
+                var appDbCreator = (RelationalDatabaseCreator)
+                    appDbContext.Database.GetService<IDatabaseCreator>();
 
-                var grantDbContext = serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>();
+                var grantDbContext =
+                    serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>();
                 grantDbContext.Database.EnsureCreated();
-                var grantDbCreator = (RelationalDatabaseCreator)grantDbContext.Database.GetService<IDatabaseCreator>();
+                var grantDbCreator = (RelationalDatabaseCreator)
+                    grantDbContext.Database.GetService<IDatabaseCreator>();
 
-                var configDbContext = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-                var configDbCreator = (RelationalDatabaseCreator)configDbContext.Database.GetService<IDatabaseCreator>();
+                var configDbContext =
+                    serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+                var configDbCreator = (RelationalDatabaseCreator)
+                    configDbContext.Database.GetService<IDatabaseCreator>();
 
                 try
                 {
@@ -190,10 +201,7 @@ namespace IdentityServer
                     configDbContext.Database.Migrate();
                     appDbContext.Database.Migrate();
                 }
-                catch
-                {
-
-                }
+                catch { }
 
                 try
                 {
@@ -201,10 +209,7 @@ namespace IdentityServer
                     appDbCreator.CreateTables();
                     grantDbCreator.CreateTables();
                 }
-                catch
-                {
-
-                }
+                catch { }
 
                 if (configDbContext.Clients.Any())
                 {
@@ -214,7 +219,9 @@ namespace IdentityServer
                         configDbContext.Clients.Add(client.ToEntity());
                     }
                     configDbContext.SaveChanges();
-                } else {
+                }
+                else
+                {
                     foreach (var client in Config.Clients(configuration))
                     {
                         configDbContext.Clients.Add(client.ToEntity());
@@ -248,7 +255,6 @@ namespace IdentityServer
                     }
                     configDbContext.SaveChanges();
                 }
-
             }
         }
     }

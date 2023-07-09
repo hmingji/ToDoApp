@@ -19,7 +19,12 @@ namespace ToDoTask.API.ScheduledJobs
         private IMapper _mapper;
         private ILogger<SendReminderEvents> _logger;
 
-        public SendReminderEvents(ITaskItemRepositories taskItemRepositories, IPublishEndpoint publishEndpoint, IMapper mapper, ILogger<SendReminderEvents> logger)
+        public SendReminderEvents(
+            ITaskItemRepositories taskItemRepositories,
+            IPublishEndpoint publishEndpoint,
+            IMapper mapper,
+            ILogger<SendReminderEvents> logger
+        )
         {
             _taskItemRepositories = taskItemRepositories;
             _publishEndpoint = publishEndpoint;
@@ -30,13 +35,16 @@ namespace ToDoTask.API.ScheduledJobs
         public async Task Invoke()
         {
             DateTime taskDueDate = DateTime.Now.AddDays(2);
-            List<TaskItem> tasksToRemind = await _taskItemRepositories.GetTaskItemsByDate(taskDueDate);
-        
-            if (!tasksToRemind.Any()) return;
+            List<TaskItem> tasksToRemind = await _taskItemRepositories.GetTaskItemsByDate(
+                taskDueDate
+            );
+
+            if (!tasksToRemind.Any())
+                return;
 
             foreach (TaskItem task in tasksToRemind)
             {
-                try 
+                try
                 {
                     TaskReminderEvent eventMessage = _mapper.Map<TaskReminderEvent>(task);
                     await _publishEndpoint.Publish<TaskReminderEvent>(eventMessage);
