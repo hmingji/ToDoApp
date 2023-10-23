@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: email-config
+data:
+  EMAIL_TEMPLATE_ID: '4466552'
+  FROM_ADDRESS: ${SENDER_ADDRESS}
+  FROM_NAME: todoapps
+  TESTMAIL_BODY: <h1>testing email</h1>
+  TESTMAIL_RECEIPIENT: ${TEST_ADDRESS}
+  TESTMAIL_SUBJECT: todo notification test

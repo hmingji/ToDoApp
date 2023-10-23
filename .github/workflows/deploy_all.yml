@@ -1,0 +1,180 @@
+name: Deploy all
+
+on:
+  push:
+    branches: [main]
+
+env:
+  GOOGLE_CREDENTIALS: ${{secrets.GKE_SA_KEY}}
+  TF_VAR_DB_USERNAME: ${{ secrets.TF_VAR_DB_USERNAME }}
+  TF_VAR_DB_PASSWORD: ${{ secrets.TF_VAR_DB_PASSWORD }}
+  PROJECT_ID: ${{secrets.GKE_PROJECT}}
+  BASE64: ${{secrets.BASE64}}
+  REPO: todoapps
+
+jobs:
+  deploy_infra:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Docker Build
+        run: |
+          docker build --target base -t local .
+
+      - name: Run terraform
+        run: |
+          echo "$BASE64" | base64 --decode | jq > ./infra/gcp-credentials.json
+          docker run \
+            -e GOOGLE_APPLICATION_CREDENTIALS=gcp-credentials.json \
+            -e TF_VAR_DB_USERNAME=$TF_VAR_DB_USERNAME \
+            -e TF_VAR_DB_PASSWORD=$TF_VAR_DB_PASSWORD \
+            -v `pwd`:/home/app local sh \
+            -c "cd infra && terraform init && terraform apply -auto-approve"
+
+  build_and_publish_service_images:
+    needs: deploy_infra
+    runs-on: ubuntu-latest
+    environment: production
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: ./Services/Identity/Dockerfile
+            image: identity
+          - dockerfile: ./Services/ToDoTask/Dockerfile
+            image: todotask
+          - dockerfile: ./Services/EmailNotification/Dockerfile
+            image: email
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: ${{secrets.BASE64}}
+
+      # Setup gcloud CLI
+      - uses: google-github-actions/setup-gcloud@1bee7de035d65ec5da40a31f8589e240eba8fde5
+        with:
+          project_id: ${{ secrets.GKE_PROJECT }}
+
+      # Configure Docker to use the gcloud command-line tool as a credential
+      # helper for authentication
+      - run: |-
+          gcloud auth configure-docker asia-southeast1-docker.pkg.dev --quiet
+
+      - name: Build
+        env:
+          IMAGE: ${{ matrix.image }}
+          DOCKERFILE_PATH: ${{ matrix.dockerfile }}
+        run: |
+          docker build \
+            --tag "asia-southeast1-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE:latest" \
+            --file $DOCKERFILE_PATH \
+            .
+
+      - name: Publish
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |-
+          docker push "asia-southeast1-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE:latest"
+
+  build_and_publish_webclient_image:
+    needs: deploy_infra
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: ${{secrets.BASE64}}
+
+      # Setup gcloud CLI
+      - uses: google-github-actions/setup-gcloud@1bee7de035d65ec5da40a31f8589e240eba8fde5
+        with:
+          project_id: ${{ secrets.GKE_PROJECT }}
+
+      # Configure Docker to use the gcloud command-line tool as a credential
+      # helper for authentication
+      - run: |-
+          gcloud auth configure-docker asia-southeast1-docker.pkg.dev --quiet
+
+      - name: Build
+        env:
+          IMAGE: client
+          DOCKERFILE_PATH: ./client/Dockerfile
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+          REACT_APP_PUBLIC_URL: ${{ secrets.REACT_APP_PUBLIC_URL }}
+          REACT_APP_AUTH_URL: ${{ secrets.REACT_APP_AUTH_URL }}
+          REACT_APP_CLIENT_ID: ${{ secrets.REACT_APP_CLIENT_ID }}
+          REACT_APP_CLIENT_SECRET: ${{ secrets.REACT_APP_CLIENT_SECRET }}
+          REACT_APP_CLIENT_SCOPE: ${{ secrets.REACT_APP_CLIENT_SCOPE }}
+        run: |
+          docker build \
+            --build-arg REACT_APP_API_URL="$REACT_APP_API_URL" \
+            --build-arg REACT_APP_PUBLIC_URL="$REACT_APP_PUBLIC_URL" \
+            --build-arg REACT_APP_AUTH_URL="$REACT_APP_AUTH_URL" \
+            --build-arg REACT_APP_CLIENT_ID="$REACT_APP_CLIENT_ID" \
+            --build-arg REACT_APP_CLIENT_SECRET="$REACT_APP_CLIENT_SECRET" \
+            --build-arg REACT_APP_CLIENT_SCOPE="$REACT_APP_CLIENT_SCOPE" \
+            --tag "asia-southeast1-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE:latest" \
+            --file $DOCKERFILE_PATH \
+            .
+
+      - name: Publish
+        env:
+          IMAGE: client
+        run: |-
+          docker push "asia-southeast1-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE:latest"
+
+  deploy_microservices:
+    needs: [build_and_publish_service_images, build_and_publish_webclient_image]
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: ${{secrets.BASE64}}
+
+      - uses: google-github-actions/setup-gcloud@1bee7de035d65ec5da40a31f8589e240eba8fde5
+        with:
+          project_id: ${{ secrets.GKE_PROJECT }}
+
+      - uses: google-github-actions/get-gke-credentials@db150f2cc60d1716e61922b832eae71d2a45938f
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+
+      - name: insert value for configMap and secret
+        env:
+          DB_USERNAME: ${{ secrets.TF_VAR_DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.TF_VAR_DB_PASSWORD }}
+          MJ_APIKEY_PRIVATE: ${{ secrets.MJ_APIKEY_PRIVATE }}
+          MJ_APIKEY_PUBLIC: ${{ secrets.MJ_APIKEY_PUBLIC }}
+          RABBITMQ_DEFAULT_PASS: ${{ secrets.RABBITMQ_DEFAULT_PASS }}
+          RABBITMQ_DEFAULT_USER: ${{ secrets.RABBITMQ_DEFAULT_USER }}
+          RABBITMQ_ERLANG_COOKIE: ${{ secrets.RABBITMQ_ERLANG_COOKIE }}
+          RABBITMQ_HOSTADDRESS: ${{ secrets.RABBITMQ_HOSTADDRESS }}
+          SENDER_ADDRESS: ${{ secrets.SENDER_ADDRESS }}
+          TEST_ADDRESS: ${{ secrets.TEST_ADDRESS }}
+        run: |
+          export DB_IP=$(gcloud sql instances describe todoapps-db --project $PROJECT_ID --format 'value(ipAddresses.filter('type:PRIMARY').firstof('ipAddress'))')
+          export DATABASE_URL="postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_IP}/todoapps"
+          ./.github/workflows/insert_values.sh
+
+      - name: deploy
+        run: |
+          kubectl apply -f k8s/Client --recursive
+          kubectl apply -f k8s/Identity --recursive
+          kubectl apply -f k8s/Rabbitmq --recursive
+          kubectl apply -f k8s/EmailNotification --recursive
+          kubectl apply -f k8s/ToDoTask --recursive
+          kubectl apply -f k8s/Ingress --recursive

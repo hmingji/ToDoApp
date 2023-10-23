@@ -1,0 +1,56 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: todoapps-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: todoapps-ip
+    networking.gke.io/managed-certificates: todoapps-managed-cert
+    kubernetes.io/ingress.class: 'gce'
+    networking.gke.io/v1beta1.FrontendConfig: http-to-https
+spec:
+  defaultBackend:
+    service:
+      name: client-service
+      port:
+        number: 80
+  rules:
+    - host: auth.hmingji.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: identity-service
+                port:
+                  number: 80
+    - host: todoapps.hmingji.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: task-service
+                port:
+                  number: 80
+    - host: todoclient.hmingji.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: client-service
+                port:
+                  number: 80
+    - host: rabbitmq.hmingji.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rabbitmq-service
+                port:
+                  number: 15672

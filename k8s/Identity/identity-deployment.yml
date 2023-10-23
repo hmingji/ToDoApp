@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-deployment
+  labels:
+    app: identity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: identity
+  template:
+    metadata:
+      labels:
+        app: identity
+    spec:
+      containers:
+        - name: identity
+          image: asia-southeast1-docker.pkg.dev/refined-veld-398701/todoapps/identity:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: identity-config
+                  key: ASPNETCORE_ENVIRONMENT
+            - name: ClientOrigin
+              valueFrom:
+                configMapKeyRef:
+                  name: identity-config
+                  key: ClientOrigin
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: identity-config
+                  key: PORT
+            - name: PublicUrl
+              valueFrom:
+                configMapKeyRef:
+                  name: identity-config
+                  key: PublicUrl
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: identity-secret
+                  key: DATABASE_URL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: identity-service
+spec:
+  selector:
+    app: identity
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
